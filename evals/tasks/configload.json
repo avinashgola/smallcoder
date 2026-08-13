@@ -1,0 +1,13 @@
+{
+  "id": "configload",
+  "category": "configuration/default bug",
+  "fixture": "evals/fixtures/configload",
+  "issue": "Setting APP_DEBUG=false (or 0, or no) still enables debug mode; every non-empty string is treated as true.",
+  "ground_truth_files": ["settings.py"],
+  "reference_fix": {
+    "path": "settings.py",
+    "old": "    if isinstance(value, bool):\n        return value\n    return bool(value)",
+    "new": "    if isinstance(value, bool):\n        return value\n    return str(value).strip().lower() not in (\"\", \"0\", \"false\", \"no\", \"off\")"
+  },
+  "max_steps": 30
+}

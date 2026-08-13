@@ -1,0 +1,13 @@
+{
+  "id": "csvparse",
+  "category": "parser/data-transformation bug",
+  "fixture": "evals/fixtures/csvparse",
+  "issue": "parse_records keeps stray whitespace in item names when the CSV has spaces around commas.",
+  "ground_truth_files": ["csv_utils.py"],
+  "reference_fix": {
+    "path": "csv_utils.py",
+    "old": "        fields = line.split(\",\")",
+    "new": "        fields = [field.strip() for field in line.split(\",\")]"
+  },
+  "max_steps": 30
+}

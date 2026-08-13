@@ -1,0 +1,13 @@
+{
+  "id": "demo-auth",
+  "category": "reliability-stress (pytest import trap preserved; original Milestone 1 fixture)",
+  "fixture": "examples/demo-auth",
+  "issue": "Login fails when the email address contains uppercase characters.",
+  "ground_truth_files": ["app.py"],
+  "reference_fix": {
+    "path": "app.py",
+    "old": "stored = USERS.get(email.strip())",
+    "new": "stored = USERS.get(email.strip().lower())"
+  },
+  "max_steps": 30
+}

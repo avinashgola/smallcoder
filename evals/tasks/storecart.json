@@ -1,0 +1,13 @@
+{
+  "id": "storecart",
+  "category": "multi-file behavior bug (symptom in cart.py, defect in discounts.py)",
+  "fixture": "evals/fixtures/storecart",
+  "issue": "Applying a 10% discount to a 100.00 cart total returns 0.00 instead of 90.00, and a 25% discount produces a negative total.",
+  "ground_truth_files": ["store/discounts.py", "store/cart.py"],
+  "reference_fix": {
+    "path": "store/discounts.py",
+    "old": "    return round(total * (1 - percent / 10), 2)",
+    "new": "    return round(total * (1 - percent / 100), 2)"
+  },
+  "max_steps": 30
+}

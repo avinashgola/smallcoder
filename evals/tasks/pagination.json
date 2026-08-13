@@ -1,0 +1,13 @@
+{
+  "id": "pagination",
+  "category": "simple logic/boundary bug",
+  "fixture": "evals/fixtures/pagination",
+  "issue": "paginate() returns one item fewer than per_page on every page; with per_page=1 it returns nothing at all.",
+  "ground_truth_files": ["pagination.py"],
+  "reference_fix": {
+    "path": "pagination.py",
+    "old": "    return items[start : start + per_page - 1]",
+    "new": "    return items[start : start + per_page]"
+  },
+  "max_steps": 30
+}

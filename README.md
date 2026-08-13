@@ -109,6 +109,7 @@ Everything is environment-driven (see [.env.example](.env.example)):
 | `OLLAMA_BASE_URL` | Ollama server URL | `http://localhost:11434` |
 | `OLLAMA_MODEL` | Model tag (any <12B coding model) | *(required)* |
 | `OLLAMA_FORMAT` | `json` / `schema` / `off` output constraint | `json` |
+| `OLLAMA_FORCE_IPV4` | `1` forces IPv4 connections (`curl -4` equivalent) | off |
 | `SMALLCODER_CONTEXT_LIMIT` | Context window in tokens (also `num_ctx`) | `12000` |
 | `SMALLCODER_MAX_STEPS` | Hard step limit per run | `30` |
 | `SMALLCODER_COMMAND_TIMEOUT` | Seconds per command | `120` |

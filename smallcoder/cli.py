@@ -38,6 +38,7 @@ def _build_model(settings):
         request_timeout=settings.request_timeout,
         structured_format=settings.structured_format,
         num_ctx=settings.context_limit,
+        force_ipv4=settings.force_ipv4,
     )
 
 

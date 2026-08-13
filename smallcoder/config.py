@@ -30,6 +30,7 @@ class Settings:
     base_url: str = "http://localhost:11434"
     model: str = ""
     structured_format: str = "json"  # "json" | "schema" | "off"
+    force_ipv4: bool = False  # OLLAMA_FORCE_IPV4: force IPv4 connections (curl -4 equivalent)
 
     context_limit: int = 12000  # approximate model context window, in tokens
     max_steps: int = 30
@@ -48,6 +49,13 @@ class Settings:
         reserves ~30% of the window for the model's reply and overhead.
         """
         return int(self.context_limit * 4 * 0.7)
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name, "").strip().lower()
+    if not raw:
+        return default
+    return raw in ("1", "true", "yes", "on")
 
 
 def _env_int(name: str, default: int) -> int:
@@ -78,6 +86,7 @@ def load_settings(**overrides: object) -> Settings:
         "base_url": os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
         "model": os.environ.get("OLLAMA_MODEL", "").strip(),
         "structured_format": os.environ.get("OLLAMA_FORMAT", "json").strip() or "json",
+        "force_ipv4": _env_bool("OLLAMA_FORCE_IPV4"),
         "context_limit": _env_int("SMALLCODER_CONTEXT_LIMIT", 12000),
         "max_steps": _env_int("SMALLCODER_MAX_STEPS", 30),
         "command_timeout": _env_int("SMALLCODER_COMMAND_TIMEOUT", 120),

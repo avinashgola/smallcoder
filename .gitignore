@@ -1,0 +1,20 @@
+# Environments / secrets
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# SmallCoder run artifacts
+results/
+
+# OS
+.DS_Store

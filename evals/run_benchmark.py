@@ -52,6 +52,30 @@ def prepare_repo(fixture: Path) -> Path:
     return workdir
 
 
+def wait_for_server(settings, max_wait_s: int = 600) -> bool:
+    """Block until the inference server answers, so a transient local network
+    outage pauses the benchmark instead of burning trials with model_error."""
+    import httpx
+
+    from smallcoder.models.ollama import ForceIPv4Transport
+
+    transport = ForceIPv4Transport() if settings.force_ipv4 else None
+    client = httpx.Client(timeout=10, transport=transport)
+    deadline = time.monotonic() + max_wait_s
+    try:
+        while time.monotonic() < deadline:
+            try:
+                if client.get(settings.base_url + "/api/version").status_code == 200:
+                    return True
+            except httpx.HTTPError:
+                pass
+            print("[runner] server unreachable, waiting 30s...", flush=True)
+            time.sleep(30)
+        return False
+    finally:
+        client.close()
+
+
 def run_one(task: dict, model_name: str, loop_detector: bool) -> dict:
     settings = load_settings(model=model_name, loop_detector=loop_detector)
     client = OllamaClient(
@@ -115,9 +139,18 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     config = "detector-on" if args.loop_detector == "on" else "detector-off"
 
+    settings_probe = load_settings(model=args.model)
     for task in tasks:
         for trial in range(1, args.trials + 1):
-            row = run_one(task, args.model, args.loop_detector == "on")
+            for attempt in range(2):  # one retry if the network drops mid-run
+                if not wait_for_server(settings_probe):
+                    print("[runner] server unreachable for 10 minutes, aborting", flush=True)
+                    return
+                row = run_one(task, args.model, args.loop_detector == "on")
+                if row.get("stop_reason") != "model_error":
+                    break
+                print(f"[runner] {task['id']} trial {trial}: model_error, retrying once",
+                      flush=True)
             row.update({"task": task["id"], "trial": trial, "model": args.model,
                         "config": config})
             with out.open("a", encoding="utf-8") as fh:

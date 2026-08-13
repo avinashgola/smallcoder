@@ -72,7 +72,8 @@ def _print_result(result: RunResult) -> None:
     stats = (
         f"steps={result.steps} model_calls={result.model_calls} "
         f"tokens_in={result.tokens_in} tokens_out={result.tokens_out} "
-        f"structured_output_failures={result.structured_output_failures}"
+        f"structured_output_failures={result.structured_output_failures} "
+        f"loop_detections={result.loop_detections} loop_interventions={result.loop_interventions}"
     )
     console.print(f"[dim]{stats}[/dim]")
     console.print(
@@ -95,11 +96,20 @@ def solve(
     test_command: str | None = typer.Option(
         None, "--test-command", help="Verification test command (default: auto-detect pytest)."
     ),
+    loop_detector: bool | None = typer.Option(
+        None,
+        "--loop-detector/--no-loop-detector",
+        help="Ablation flag: enable/disable loop detection (default: SMALLCODER_LOOP_DETECTOR).",
+    ),
 ) -> None:
     """Resolve an issue in a local git repository autonomously."""
     load_dotenv()
     settings = load_settings(
-        model=model, base_url=base_url, max_steps=max_steps, context_limit=context_limit
+        model=model,
+        base_url=base_url,
+        max_steps=max_steps,
+        context_limit=context_limit,
+        loop_detector=loop_detector,
     )
     try:
         client = _build_model(settings)

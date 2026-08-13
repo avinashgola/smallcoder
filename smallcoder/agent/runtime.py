@@ -34,6 +34,7 @@ from smallcoder.gitutils import (
 )
 from smallcoder.models.base import ModelClient, ModelClientError
 from smallcoder.observability.logger import TrajectoryLogger
+from smallcoder.recovery.loop_detector import LoopDetector, diff_state_hash
 from smallcoder.tools.base import ToolResult
 from smallcoder.tools.edit_file import edit_file
 from smallcoder.tools.read_file import read_file
@@ -57,6 +58,8 @@ class RunResult(BaseModel):
     tokens_in: int
     tokens_out: int
     structured_output_failures: int
+    loop_detections: int = 0
+    loop_interventions: int = 0
     files_changed: list[str]
     diff: str
     verification: VerificationResult | None = None
@@ -86,6 +89,14 @@ class AgentRuntime:
             )
         self.state = AgentState(issue=self.issue)
         self.baseline = snapshot(self.repo_root)
+        self._loop_detector = (
+            LoopDetector(
+                repeat_threshold=self.settings.loop_repeat_threshold,
+                no_progress_window=self.settings.loop_no_progress_window,
+            )
+            if self.settings.loop_detector
+            else None
+        )
 
     # ------------------------------------------------------------- prompting
 
@@ -181,6 +192,63 @@ class AgentRuntime:
 
     # ---------------------------------------------------------------- tools
 
+    # ---------------------------------------------------------- loop guard
+
+    def _loop_reset_text(self, detail: str) -> str:
+        """Build the strategy-reset observation, preserving useful discoveries."""
+        lines = [
+            f"LOOP DETECTED: {detail}.",
+            "That approach is not working. Do NOT repeat it.",
+            "Progress so far (preserved):",
+            f"- Files read: {', '.join(self.state.files_read) or '(none)'}",
+            f"- Files edited: {', '.join(self.state.files_edited) or '(none)'}"
+            + (
+                " (a git diff exists with your changes)"
+                if self.state.files_edited
+                else ""
+            ),
+        ]
+        if self.state.error_signatures:
+            lines.append("- Errors seen: " + " | ".join(self.state.error_signatures))
+        lines.append(
+            "Choose a meaningfully different strategy now: use a different action type, "
+            "different arguments, or investigate something you have not looked at yet."
+        )
+        return "\n".join(lines)
+
+    def _check_for_loop(self, step: int, action: AgentAction, result: ToolResult) -> None:
+        if self._loop_detector is None:
+            return
+        signature = result.observation.splitlines()[0] if result.observation else ""
+        detection = self._loop_detector.observe(
+            action_type=action.action_type,
+            arguments=action.arguments,
+            files_touched=result.files_touched,
+            diff_hash=diff_state_hash(working_tree_diff(self.repo_root)),
+            result_signature=signature,
+        )
+        if detection is None:
+            return
+        self.state.loop_detections += 1
+        self.logger.event(
+            "loop_detected", step=step, kind=detection.kind, detail=detection.detail
+        )
+        if self.state.loop_interventions >= self.settings.loop_max_interventions:
+            return  # bounded: keep logging detections but stop resetting strategy
+        self.state.loop_interventions += 1
+        reset_record = StepRecord(
+            step=step,
+            action=None,
+            observation=self._loop_reset_text(detection.detail),
+            ok=True,
+            error_type="LOOP_RESET",
+        )
+        self.state.history = [reset_record]
+        self._loop_detector.reset()
+        self.logger.event(
+            "loop_intervention", step=step, interventions=self.state.loop_interventions
+        )
+
     def _dispatch(self, action: AgentAction, typed_args: object) -> ToolResult:
         if isinstance(typed_args, ReadFileArgs):
             return read_file(self.repo_root, typed_args, self.settings.max_tool_output_chars)
@@ -205,6 +273,10 @@ class AgentRuntime:
                     "context_limit": self.settings.context_limit,
                     "max_steps": self.settings.max_steps,
                     "structured_format": self.settings.structured_format,
+                    "loop_detector": self.settings.loop_detector,
+                    "loop_repeat_threshold": self.settings.loop_repeat_threshold,
+                    "loop_no_progress_window": self.settings.loop_no_progress_window,
+                    "loop_max_interventions": self.settings.loop_max_interventions,
                 },
                 "baseline_head": self.baseline.head,
                 "baseline_dirty_paths": sorted(self.baseline.dirty_paths),
@@ -285,9 +357,13 @@ class AgentRuntime:
                     error_type="VERIFICATION_FAILURE",
                 )
                 self.state.record_step(record)
+                self.state.note_error(observation)
                 self._notify(step, action, False)
                 self.logger.event("step", step=step, action=action.model_dump(), ok=False,
                                   observation=observation)
+                self._check_for_loop(
+                    step, action, ToolResult(ok=False, output=observation, error=observation)
+                )
                 if self.state.finish_attempts >= MAX_FINISH_ATTEMPTS:
                     stop_reason = "verification_failed"
                     final_summary = verification.failure_summary()
@@ -297,6 +373,10 @@ class AgentRuntime:
             result = self._dispatch(action, typed_args)
             if result.files_touched:
                 self.state.note_edit(result.files_touched)
+            if action.action_type == "read_file" and result.ok:
+                self.state.note_read(str(action.arguments.get("path", "")))
+            if not result.ok:
+                self.state.note_error(result.observation.splitlines()[0])
             if len(result.observation) > self.settings.max_tool_output_chars:
                 self.logger.save_output(f"step_{step:03d}.txt", result.observation)
             record = StepRecord(
@@ -316,6 +396,7 @@ class AgentRuntime:
                 files_touched=result.files_touched,
                 observation=result.observation[:1000],
             )
+            self._check_for_loop(step, action, result)
 
         needs_final_verify = verification is None or stop_reason not in ("verified", "model_error")
         if needs_final_verify:
@@ -336,6 +417,8 @@ class AgentRuntime:
             tokens_in=self.state.tokens_in,
             tokens_out=self.state.tokens_out,
             structured_output_failures=self.state.structured_output_failures,
+            loop_detections=self.state.loop_detections,
+            loop_interventions=self.state.loop_interventions,
             files_changed=files_changed,
             diff=diff,
             verification=verification,

@@ -41,6 +41,12 @@ class Settings:
     runs_dir: Path = Path("results/runs")
     allowed_commands: tuple[str, ...] = field(default=DEFAULT_ALLOWED_COMMANDS)
 
+    # Milestone 2A: loop detection (ablation flag + bounded thresholds)
+    loop_detector: bool = True
+    loop_repeat_threshold: int = 3
+    loop_no_progress_window: int = 6
+    loop_max_interventions: int = 2
+
     @property
     def prompt_char_budget(self) -> int:
         """Approximate character budget for the prompt side of the context.
@@ -93,6 +99,10 @@ def load_settings(**overrides: object) -> Settings:
         "request_timeout": float(_env_int("SMALLCODER_REQUEST_TIMEOUT", 300)),
         "runs_dir": Path(os.environ.get("SMALLCODER_RUNS_DIR", "results/runs")),
         "allowed_commands": allowed,
+        "loop_detector": _env_bool("SMALLCODER_LOOP_DETECTOR", default=True),
+        "loop_repeat_threshold": _env_int("SMALLCODER_LOOP_REPEAT_THRESHOLD", 3),
+        "loop_no_progress_window": _env_int("SMALLCODER_LOOP_NO_PROGRESS_WINDOW", 6),
+        "loop_max_interventions": _env_int("SMALLCODER_LOOP_MAX_INTERVENTIONS", 2),
     }
     for key, value in overrides.items():
         if value is not None:

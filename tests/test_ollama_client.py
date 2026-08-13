@@ -165,6 +165,7 @@ def test_force_ipv4_client_still_completes(monkeypatch):
 def test_force_ipv4_env_parsing(monkeypatch):
     from smallcoder.config import load_settings
 
+    monkeypatch.delenv("OLLAMA_FORCE_IPV4", raising=False)  # isolate from ambient env
     assert load_settings().force_ipv4 is False
     for raw, expected in (("1", True), ("true", True), ("YES", True), ("0", False), ("off", False)):
         monkeypatch.setenv("OLLAMA_FORCE_IPV4", raw)

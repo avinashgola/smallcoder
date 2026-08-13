@@ -142,7 +142,7 @@ def main() -> None:
     settings_probe = load_settings(model=args.model)
     for task in tasks:
         for trial in range(1, args.trials + 1):
-            for attempt in range(2):  # one retry if the network drops mid-run
+            for _attempt in range(2):  # one retry if the network drops mid-run
                 if not wait_for_server(settings_probe):
                     print("[runner] server unreachable for 10 minutes, aborting", flush=True)
                     return

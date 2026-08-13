@@ -292,7 +292,9 @@ class AgentRuntime:
         final_summary = ""
         verification: VerificationResult | None = None
 
+        steps_taken = 0
         for step in range(1, self.settings.max_steps + 1):
+            steps_taken = step
             try:
                 parsed = self._next_action(repo_map)
             except ModelClientError as exc:
@@ -412,7 +414,7 @@ class AgentRuntime:
             run_id=self.logger.run_id,
             success=stop_reason == "verified",
             stop_reason=stop_reason,
-            steps=len(self.state.history),
+            steps=steps_taken,  # len(history) undercounts after loop-reset compaction
             model_calls=self.state.model_calls,
             tokens_in=self.state.tokens_in,
             tokens_out=self.state.tokens_out,

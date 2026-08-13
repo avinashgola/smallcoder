@@ -169,6 +169,7 @@ def test_interventions_are_bounded(tmp_path: Path):
     result = runtime.run()
     assert result.loop_interventions == 1  # capped
     assert result.loop_detections > 1  # detections keep being logged past the cap
+    assert result.steps == 12  # steps count iterations, not the compacted history
 
 
 def test_loop_detection_does_not_declare_success(tmp_path: Path):

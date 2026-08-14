@@ -76,8 +76,12 @@ def wait_for_server(settings, max_wait_s: int = 600) -> bool:
         client.close()
 
 
-def run_one(task: dict, model_name: str, loop_detector: bool) -> dict:
-    settings = load_settings(model=model_name, loop_detector=loop_detector)
+def run_one(task: dict, model_name: str, loop_detector: bool, stall_verification: bool) -> dict:
+    settings = load_settings(
+        model=model_name,
+        loop_detector=loop_detector,
+        stall_verification=stall_verification,
+    )
     client = OllamaClient(
         base_url=settings.base_url,
         model=settings.model,
@@ -109,6 +113,8 @@ def run_one(task: dict, model_name: str, loop_detector: bool) -> dict:
             "structured_output_failures": result.structured_output_failures,
             "loop_detections": result.loop_detections,
             "loop_interventions": result.loop_interventions,
+            "completion_mode": result.completion_mode,
+            "stall_checks": result.stall_checks,
             "files_changed": result.files_changed,
             "final_verification_passed": (
                 result.verification.passed if result.verification else None
@@ -128,6 +134,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", required=True)
     parser.add_argument("--loop-detector", choices=["on", "off"], required=True)
+    parser.add_argument("--stall-verification", choices=["on", "off"], default="off")
     parser.add_argument("--trials", type=int, default=3)
     parser.add_argument("--out", required=True)
     parser.add_argument("--task", action="append", default=None)
@@ -137,7 +144,11 @@ def main() -> None:
     tasks = load_tasks(args.task)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    config = "detector-on" if args.loop_detector == "on" else "detector-off"
+    config = (
+        f"loop-{args.loop_detector}+stall-{args.stall_verification}"
+        if args.stall_verification == "on"
+        else ("detector-on" if args.loop_detector == "on" else "detector-off")
+    )
 
     settings_probe = load_settings(model=args.model)
     for task in tasks:
@@ -146,7 +157,12 @@ def main() -> None:
                 if not wait_for_server(settings_probe):
                     print("[runner] server unreachable for 10 minutes, aborting", flush=True)
                     return
-                row = run_one(task, args.model, args.loop_detector == "on")
+                row = run_one(
+                    task,
+                    args.model,
+                    args.loop_detector == "on",
+                    args.stall_verification == "on",
+                )
                 if row.get("stop_reason") != "model_error":
                     break
                 print(f"[runner] {task['id']} trial {trial}: model_error, retrying once",
@@ -158,6 +174,7 @@ def main() -> None:
             print(
                 f"[{args.model}/{config}] {task['id']} trial {trial}: "
                 f"{'SOLVED' if row.get('success') else row.get('stop_reason')} "
+                f"[{row.get('completion_mode')}] "
                 f"steps={row.get('steps')} loops={row.get('loop_detections')} "
                 f"({row.get('duration_s')}s)",
                 flush=True,

@@ -45,6 +45,7 @@ class AgentState:
     model_calls: int = 0
     loop_detections: int = 0
     loop_interventions: int = 0
+    stall_checks: int = 0
 
     def record_step(self, record: StepRecord) -> None:
         self.history.append(record)

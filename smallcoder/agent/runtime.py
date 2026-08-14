@@ -52,7 +52,11 @@ MAX_REPO_MAP_FILES = 150
 class RunResult(BaseModel):
     run_id: str
     success: bool
-    stop_reason: str  # "verified" | "max_steps" | "output_failures" | "model_error" | ...
+    # "verified" | "verified_stall_rescue" | "max_steps" | "output_failures" | "model_error" | ...
+    stop_reason: str
+    # "model_initiated" (model called finish) | "runtime_rescued" (M2B) | "none"
+    completion_mode: str = "none"
+    stall_checks: int = 0
     steps: int
     model_calls: int
     tokens_in: int
@@ -97,6 +101,10 @@ class AgentRuntime:
             if self.settings.loop_detector
             else None
         )
+        # M2B stall-verification bookkeeping
+        self._last_stall_check_step = 0
+        self._last_stall_diff_hash: str | None = None
+        self._loop_since_last_check = False
 
     # ------------------------------------------------------------- prompting
 
@@ -230,6 +238,7 @@ class AgentRuntime:
         if detection is None:
             return
         self.state.loop_detections += 1
+        self._loop_since_last_check = True  # M2B: a loop is also a stall signal
         self.logger.event(
             "loop_detected", step=step, kind=detection.kind, detail=detection.detail
         )
@@ -248,6 +257,55 @@ class AgentRuntime:
         self.logger.event(
             "loop_intervention", step=step, interventions=self.state.loop_interventions
         )
+
+    # ------------------------------------------------- M2B: stall verification
+
+    def _maybe_stall_verify(self, step: int) -> VerificationResult | None:
+        """Run verification when the model has changed code but has not finished.
+
+        Milestone 2A showed that a large share of failed runs already contained a
+        complete, verification-passing fix: the model simply never requested
+        `finish`. This check runs the same deterministic pipeline the runtime
+        would run at `finish` time and returns a passing result when the run can
+        be completed by the runtime instead of the model.
+
+        Bounded and side-effect free with respect to the model: it is gated by a
+        step interval, skipped unless the working tree changed since the last
+        check, and a *failing* result is logged but never fed back into the
+        prompt (M2B must not change model-facing behavior).
+        """
+        if not self.settings.stall_verification:
+            return None
+        if not changed_since(self.repo_root, self.baseline):
+            return None  # nothing has been modified; nothing to verify
+
+        due = (step - self._last_stall_check_step) >= self.settings.stall_check_interval
+        if not (due or self._loop_since_last_check):
+            return None
+
+        diff_hash = diff_state_hash(working_tree_diff(self.repo_root))
+        if diff_hash == self._last_stall_diff_hash:
+            return None  # unchanged since the last check: the result would repeat
+
+        self._last_stall_check_step = step
+        self._last_stall_diff_hash = diff_hash
+        self._loop_since_last_check = False
+        self.state.stall_checks += 1
+
+        verification = verify(
+            self.repo_root,
+            self.settings,
+            self.baseline,
+            self.state.files_edited,
+            self.test_command,
+        )
+        self.logger.event(
+            "stall_verification",
+            step=step,
+            passed=verification.passed,
+            checks=[c.model_dump() for c in verification.checks],
+        )
+        return verification if verification.passed else None
 
     def _dispatch(self, action: AgentAction, typed_args: object) -> ToolResult:
         if isinstance(typed_args, ReadFileArgs):
@@ -277,6 +335,8 @@ class AgentRuntime:
                     "loop_repeat_threshold": self.settings.loop_repeat_threshold,
                     "loop_no_progress_window": self.settings.loop_no_progress_window,
                     "loop_max_interventions": self.settings.loop_max_interventions,
+                    "stall_verification": self.settings.stall_verification,
+                    "stall_check_interval": self.settings.stall_check_interval,
                 },
                 "baseline_head": self.baseline.head,
                 "baseline_dirty_paths": sorted(self.baseline.dirty_paths),
@@ -289,6 +349,7 @@ class AgentRuntime:
             )
 
         stop_reason = "max_steps"
+        completion_mode = "none"
         final_summary = ""
         verification: VerificationResult | None = None
 
@@ -348,6 +409,7 @@ class AgentRuntime:
                     self.state.record_step(record)
                     self._notify(step, action, True)
                     stop_reason = "verified"
+                    completion_mode = "model_initiated"
                     break
                 observation = (
                     "finish rejected: verification failed -> "
@@ -400,7 +462,23 @@ class AgentRuntime:
             )
             self._check_for_loop(step, action, result)
 
-        needs_final_verify = verification is None or stop_reason not in ("verified", "model_error")
+            rescued = self._maybe_stall_verify(step)
+            if rescued is not None:
+                verification = rescued
+                stop_reason = "verified_stall_rescue"
+                completion_mode = "runtime_rescued"
+                final_summary = (
+                    "Runtime-initiated verification passed while the model was still "
+                    "working; the fix in the working tree is complete."
+                )
+                self.logger.event("stall_rescue", step=step)
+                break
+
+        verified_reasons = ("verified", "verified_stall_rescue")
+        needs_final_verify = verification is None or stop_reason not in (
+            *verified_reasons,
+            "model_error",
+        )
         if needs_final_verify:
             # Always report final verification state, even on failure paths.
             verification = verify(
@@ -412,8 +490,10 @@ class AgentRuntime:
         diff = working_tree_diff(self.repo_root)
         result = RunResult(
             run_id=self.logger.run_id,
-            success=stop_reason == "verified",
+            success=stop_reason in verified_reasons,
             stop_reason=stop_reason,
+            completion_mode=completion_mode,
+            stall_checks=self.state.stall_checks,
             steps=steps_taken,  # len(history) undercounts after loop-reset compaction
             model_calls=self.state.model_calls,
             tokens_in=self.state.tokens_in,

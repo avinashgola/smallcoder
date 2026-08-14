@@ -44,6 +44,8 @@ def _build_model(settings):
 
 def _print_result(result: RunResult) -> None:
     status = "[green]SUCCESS[/green]" if result.success else "[red]FAILED[/red]"
+    if result.completion_mode == "runtime_rescued":
+        status += " [yellow](completed by runtime verification, not by the model)[/yellow]"
     console.print()
     console.print(Panel.fit(f"{status}  (stop reason: {result.stop_reason})", title="Result"))
 
@@ -101,6 +103,11 @@ def solve(
         "--loop-detector/--no-loop-detector",
         help="Ablation flag: enable/disable loop detection (default: SMALLCODER_LOOP_DETECTOR).",
     ),
+    stall_verification: bool | None = typer.Option(
+        None,
+        "--stall-verification/--no-stall-verification",
+        help="Ablation flag: runtime-initiated verification when the model stalls.",
+    ),
 ) -> None:
     """Resolve an issue in a local git repository autonomously."""
     load_dotenv()
@@ -110,6 +117,7 @@ def solve(
         max_steps=max_steps,
         context_limit=context_limit,
         loop_detector=loop_detector,
+        stall_verification=stall_verification,
     )
     try:
         client = _build_model(settings)

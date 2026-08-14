@@ -47,6 +47,10 @@ class Settings:
     loop_no_progress_window: int = 6
     loop_max_interventions: int = 2
 
+    # Milestone 2B: stall-triggered deterministic verification (ablation flag)
+    stall_verification: bool = True
+    stall_check_interval: int = 5  # min steps between runtime-initiated checks
+
     @property
     def prompt_char_budget(self) -> int:
         """Approximate character budget for the prompt side of the context.
@@ -103,6 +107,8 @@ def load_settings(**overrides: object) -> Settings:
         "loop_repeat_threshold": _env_int("SMALLCODER_LOOP_REPEAT_THRESHOLD", 3),
         "loop_no_progress_window": _env_int("SMALLCODER_LOOP_NO_PROGRESS_WINDOW", 6),
         "loop_max_interventions": _env_int("SMALLCODER_LOOP_MAX_INTERVENTIONS", 2),
+        "stall_verification": _env_bool("SMALLCODER_STALL_VERIFICATION", default=True),
+        "stall_check_interval": _env_int("SMALLCODER_STALL_CHECK_INTERVAL", 5),
     }
     for key, value in overrides.items():
         if value is not None:

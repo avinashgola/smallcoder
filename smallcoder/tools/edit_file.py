@@ -12,12 +12,14 @@ from pathlib import Path
 
 from smallcoder.agent.schemas import EditFileArgs
 from smallcoder.tools.base import ToolError, ToolResult, resolve_repo_path
+from smallcoder.tools.path_suggest import not_found_result
 
 
-def edit_file(repo_root: Path, args: EditFileArgs) -> ToolResult:
+def edit_file(repo_root: Path, args: EditFileArgs, path_feedback: bool = False) -> ToolResult:
     try:
         target = resolve_repo_path(repo_root, args.path)
     except ToolError as exc:
+        # Sandbox violation (absolute path, traversal, .git): never suggest.
         return ToolResult(ok=False, output="", error=str(exc))
 
     rel = str(target.relative_to(repo_root.resolve()))
@@ -43,7 +45,14 @@ def edit_file(repo_root: Path, args: EditFileArgs) -> ToolResult:
         )
 
     if not target.exists():
-        return ToolResult(ok=False, output="", error=f"File not found: {args.path}")
+        message, suggestions = not_found_result(repo_root, args.path, path_feedback)
+        return ToolResult(
+            ok=False,
+            output="",
+            error=message,
+            file_not_found=True,
+            path_suggestions=suggestions,
+        )
     if target.is_dir():
         return ToolResult(ok=False, output="", error=f"{args.path} is a directory.")
 

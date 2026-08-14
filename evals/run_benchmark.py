@@ -76,11 +76,18 @@ def wait_for_server(settings, max_wait_s: int = 600) -> bool:
         client.close()
 
 
-def run_one(task: dict, model_name: str, loop_detector: bool, stall_verification: bool) -> dict:
+def run_one(
+    task: dict,
+    model_name: str,
+    loop_detector: bool,
+    stall_verification: bool,
+    path_feedback: bool = False,
+) -> dict:
     settings = load_settings(
         model=model_name,
         loop_detector=loop_detector,
         stall_verification=stall_verification,
+        path_feedback=path_feedback,
     )
     client = OllamaClient(
         base_url=settings.base_url,
@@ -115,6 +122,9 @@ def run_one(task: dict, model_name: str, loop_detector: bool, stall_verification
             "loop_interventions": result.loop_interventions,
             "completion_mode": result.completion_mode,
             "stall_checks": result.stall_checks,
+            "file_not_found_errors": result.file_not_found_errors,
+            "path_suggestions_emitted": result.path_suggestions_emitted,
+            "path_suggestions_followed": result.path_suggestions_followed,
             "files_changed": result.files_changed,
             "final_verification_passed": (
                 result.verification.passed if result.verification else None
@@ -135,6 +145,7 @@ def main() -> None:
     parser.add_argument("--model", required=True)
     parser.add_argument("--loop-detector", choices=["on", "off"], required=True)
     parser.add_argument("--stall-verification", choices=["on", "off"], default="off")
+    parser.add_argument("--path-feedback", choices=["on", "off"], default="off")
     parser.add_argument("--trials", type=int, default=3)
     parser.add_argument("--out", required=True)
     parser.add_argument("--task", action="append", default=None)
@@ -147,11 +158,12 @@ def main() -> None:
     tasks = load_tasks(args.task, Path(args.tasks_dir) if args.tasks_dir else None)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    config = (
-        f"loop-{args.loop_detector}+stall-{args.stall_verification}"
-        if args.stall_verification == "on"
-        else ("detector-on" if args.loop_detector == "on" else "detector-off")
-    )
+    if args.path_feedback == "on":
+        config = f"loop-{args.loop_detector}+stall-{args.stall_verification}+path-on"
+    elif args.stall_verification == "on":
+        config = f"loop-{args.loop_detector}+stall-{args.stall_verification}"
+    else:
+        config = "detector-on" if args.loop_detector == "on" else "detector-off"
 
     settings_probe = load_settings(model=args.model)
     for task in tasks:
@@ -165,6 +177,7 @@ def main() -> None:
                     args.model,
                     args.loop_detector == "on",
                     args.stall_verification == "on",
+                    args.path_feedback == "on",
                 )
                 if row.get("stop_reason") != "model_error":
                     break

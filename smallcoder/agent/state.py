@@ -46,6 +46,9 @@ class AgentState:
     loop_detections: int = 0
     loop_interventions: int = 0
     stall_checks: int = 0
+    file_not_found_errors: int = 0
+    path_suggestions_emitted: int = 0
+    path_suggestions_followed: int = 0
 
     def record_step(self, record: StepRecord) -> None:
         self.history.append(record)

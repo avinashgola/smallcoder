@@ -57,6 +57,9 @@ class RunResult(BaseModel):
     # "model_initiated" (model called finish) | "runtime_rescued" (M2B) | "none"
     completion_mode: str = "none"
     stall_checks: int = 0
+    file_not_found_errors: int = 0
+    path_suggestions_emitted: int = 0
+    path_suggestions_followed: int = 0
     steps: int
     model_calls: int
     tokens_in: int
@@ -101,6 +104,7 @@ class AgentRuntime:
             if self.settings.loop_detector
             else None
         )
+        self._pending_suggestions: list[str] = []  # M3: suggestions awaiting a retry
         # M2B stall-verification bookkeeping
         self._last_stall_check_step = 0
         self._last_stall_diff_hash: str | None = None
@@ -309,11 +313,18 @@ class AgentRuntime:
 
     def _dispatch(self, action: AgentAction, typed_args: object) -> ToolResult:
         if isinstance(typed_args, ReadFileArgs):
-            return read_file(self.repo_root, typed_args, self.settings.max_tool_output_chars)
+            return read_file(
+                self.repo_root,
+                typed_args,
+                self.settings.max_tool_output_chars,
+                path_feedback=self.settings.path_feedback,
+            )
         if isinstance(typed_args, SearchCodeArgs):
             return search_code(self.repo_root, typed_args, self.settings.max_tool_output_chars)
         if isinstance(typed_args, EditFileArgs):
-            return edit_file(self.repo_root, typed_args)
+            return edit_file(
+                self.repo_root, typed_args, path_feedback=self.settings.path_feedback
+            )
         if isinstance(typed_args, RunCommandArgs):
             return run_command(self.repo_root, typed_args, self.settings)
         raise AssertionError(f"Unhandled action: {action.action_type}")
@@ -337,6 +348,7 @@ class AgentRuntime:
                     "loop_max_interventions": self.settings.loop_max_interventions,
                     "stall_verification": self.settings.stall_verification,
                     "stall_check_interval": self.settings.stall_check_interval,
+                    "path_feedback": self.settings.path_feedback,
                 },
                 "baseline_head": self.baseline.head,
                 "baseline_dirty_paths": sorted(self.baseline.dirty_paths),
@@ -435,6 +447,25 @@ class AgentRuntime:
                 continue
 
             result = self._dispatch(action, typed_args)
+
+            # M3 instrumentation. A suggestion counts as "followed" when the very
+            # next file-targeting action uses one of the exact paths we offered,
+            # which is unambiguous attribution.
+            if self._pending_suggestions and action.action_type in ("read_file", "edit_file"):
+                if str(action.arguments.get("path", "")) in self._pending_suggestions:
+                    self.state.path_suggestions_followed += 1
+                    self.logger.event("path_suggestion_followed", step=step,
+                                      path=action.arguments.get("path"))
+                self._pending_suggestions = []
+            if result.file_not_found:
+                self.state.file_not_found_errors += 1
+                if result.path_suggestions:
+                    self.state.path_suggestions_emitted += 1
+                    self._pending_suggestions = list(result.path_suggestions)
+                    self.logger.event("path_suggestion", step=step,
+                                      requested=action.arguments.get("path"),
+                                      suggestions=result.path_suggestions)
+
             if result.files_touched:
                 self.state.note_edit(result.files_touched)
             if action.action_type == "read_file" and result.ok:
@@ -494,6 +525,9 @@ class AgentRuntime:
             stop_reason=stop_reason,
             completion_mode=completion_mode,
             stall_checks=self.state.stall_checks,
+            file_not_found_errors=self.state.file_not_found_errors,
+            path_suggestions_emitted=self.state.path_suggestions_emitted,
+            path_suggestions_followed=self.state.path_suggestions_followed,
             steps=steps_taken,  # len(history) undercounts after loop-reset compaction
             model_calls=self.state.model_calls,
             tokens_in=self.state.tokens_in,

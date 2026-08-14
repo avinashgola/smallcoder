@@ -16,6 +16,9 @@ class ToolResult:
     output: str
     error: str | None = None
     files_touched: list[str] = field(default_factory=list)
+    # M3 instrumentation: set when a file reference failed to resolve.
+    file_not_found: bool = False
+    path_suggestions: list[str] = field(default_factory=list)
 
     @property
     def observation(self) -> str:

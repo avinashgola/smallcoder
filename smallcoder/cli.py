@@ -75,7 +75,10 @@ def _print_result(result: RunResult) -> None:
         f"steps={result.steps} model_calls={result.model_calls} "
         f"tokens_in={result.tokens_in} tokens_out={result.tokens_out} "
         f"structured_output_failures={result.structured_output_failures} "
-        f"loop_detections={result.loop_detections} loop_interventions={result.loop_interventions}"
+        f"loop_detections={result.loop_detections} loop_interventions={result.loop_interventions} "
+        f"file_not_found={result.file_not_found_errors} "
+        f"path_suggestions={result.path_suggestions_emitted}"
+        f"/{result.path_suggestions_followed} followed"
     )
     console.print(f"[dim]{stats}[/dim]")
     console.print(
@@ -108,6 +111,11 @@ def solve(
         "--stall-verification/--no-stall-verification",
         help="Ablation flag: runtime-initiated verification when the model stalls.",
     ),
+    path_feedback: bool | None = typer.Option(
+        None,
+        "--path-feedback/--no-path-feedback",
+        help="Ablation flag: suggest real repository paths when a file reference fails.",
+    ),
 ) -> None:
     """Resolve an issue in a local git repository autonomously."""
     load_dotenv()
@@ -118,6 +126,7 @@ def solve(
         context_limit=context_limit,
         loop_detector=loop_detector,
         stall_verification=stall_verification,
+        path_feedback=path_feedback,
     )
     try:
         client = _build_model(settings)

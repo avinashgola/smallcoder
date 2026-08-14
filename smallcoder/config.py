@@ -51,6 +51,9 @@ class Settings:
     stall_verification: bool = True
     stall_check_interval: int = 5  # min steps between runtime-initiated checks
 
+    # Milestone 3: deterministic path-resolution feedback (ablation flag)
+    path_feedback: bool = True
+
     @property
     def prompt_char_budget(self) -> int:
         """Approximate character budget for the prompt side of the context.
@@ -109,6 +112,7 @@ def load_settings(**overrides: object) -> Settings:
         "loop_max_interventions": _env_int("SMALLCODER_LOOP_MAX_INTERVENTIONS", 2),
         "stall_verification": _env_bool("SMALLCODER_STALL_VERIFICATION", default=True),
         "stall_check_interval": _env_int("SMALLCODER_STALL_CHECK_INTERVAL", 5),
+        "path_feedback": _env_bool("SMALLCODER_PATH_FEEDBACK", default=True),
     }
     for key, value in overrides.items():
         if value is not None:

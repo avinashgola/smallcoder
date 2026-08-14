@@ -1,0 +1,15 @@
+{
+  "id": "jsonflat",
+  "category": "parsing/data transformation bug",
+  "fixture": "evals/heldout/fixtures/jsonflat",
+  "issue": "flatten() loses the key prefix for nested values: {'db': {'host': 'x'}} flattens to {'host': 'x'} instead of {'db.host': 'x'}, so keys from different branches collide.",
+  "ground_truth_files": [
+    "jsonflat.py"
+  ],
+  "reference_fix": {
+    "path": "jsonflat.py",
+    "old": "            items[key] = value",
+    "new": "            items[full_key] = value"
+  },
+  "max_steps": 30
+}

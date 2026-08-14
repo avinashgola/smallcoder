@@ -1,0 +1,15 @@
+{
+  "id": "inventory",
+  "category": "multi-file bug (symptom in report.py, defect in stock.py)",
+  "fixture": "evals/heldout/fixtures/inventory",
+  "issue": "The availability report shows more units available than exist: an item with 10 on hand and 4 reserved reports 14 available instead of 6.",
+  "ground_truth_files": [
+    "warehouse/stock.py"
+  ],
+  "reference_fix": {
+    "path": "warehouse/stock.py",
+    "old": "    return on_hand + reserved",
+    "new": "    return on_hand - reserved"
+  },
+  "max_steps": 30
+}

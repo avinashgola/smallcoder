@@ -1,0 +1,15 @@
+{
+  "id": "textstats",
+  "category": "logic bug in a repository with many irrelevant files",
+  "fixture": "evals/heldout/fixtures/textstats",
+  "issue": "unique_words() returns only stop words such as 'the' and 'and'; it should return the distinct words with stop words removed.",
+  "ground_truth_files": [
+    "textstats.py"
+  ],
+  "reference_fix": {
+    "path": "textstats.py",
+    "old": "        words = {w for w in words if w in STOP_WORDS}",
+    "new": "        words = {w for w in words if w not in STOP_WORDS}"
+  },
+  "max_steps": 30
+}

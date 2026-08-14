@@ -1,0 +1,15 @@
+{
+  "id": "logparse",
+  "category": "parsing/data bug",
+  "fixture": "evals/heldout/fixtures/logparse",
+  "issue": "Log messages that contain a pipe character are truncated: everything after the first pipe in the message is lost.",
+  "ground_truth_files": [
+    "logparse.py"
+  ],
+  "reference_fix": {
+    "path": "logparse.py",
+    "old": "    parts = line.strip().split(\"|\")",
+    "new": "    parts = line.strip().split(\"|\", 2)"
+  },
+  "max_steps": 30
+}

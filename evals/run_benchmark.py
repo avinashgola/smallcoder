@@ -32,8 +32,8 @@ ROOT = Path(__file__).resolve().parent.parent
 TASKS_DIR = ROOT / "evals" / "tasks"
 
 
-def load_tasks(only: list[str] | None) -> list[dict]:
-    tasks = [json.loads(p.read_text()) for p in sorted(TASKS_DIR.glob("*.json"))]
+def load_tasks(only: list[str] | None, tasks_dir: Path | None = None) -> list[dict]:
+    tasks = [json.loads(p.read_text()) for p in sorted((tasks_dir or TASKS_DIR).glob("*.json"))]
     if only:
         tasks = [t for t in tasks if t["id"] in only]
     return tasks
@@ -138,10 +138,13 @@ def main() -> None:
     parser.add_argument("--trials", type=int, default=3)
     parser.add_argument("--out", required=True)
     parser.add_argument("--task", action="append", default=None)
+    parser.add_argument(
+        "--tasks-dir", default=None, help="Task spec directory (default: evals/tasks)."
+    )
     args = parser.parse_args()
 
     load_dotenv()
-    tasks = load_tasks(args.task)
+    tasks = load_tasks(args.task, Path(args.tasks_dir) if args.tasks_dir else None)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     config = (

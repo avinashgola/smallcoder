@@ -1,0 +1,15 @@
+{
+  "id": "tempconv",
+  "category": "simple logic bug",
+  "fixture": "evals/heldout/fixtures/tempconv",
+  "issue": "Converting Fahrenheit to Celsius gives wrong results: 212F comes back as 324 instead of 100.",
+  "ground_truth_files": [
+    "tempconv.py"
+  ],
+  "reference_fix": {
+    "path": "tempconv.py",
+    "old": "    return (fahrenheit - 32) * 9 / 5",
+    "new": "    return (fahrenheit - 32) * 5 / 9"
+  },
+  "max_steps": 30
+}

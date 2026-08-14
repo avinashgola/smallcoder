@@ -1,0 +1,15 @@
+{
+  "id": "usergroups",
+  "category": "multi-file bug with irrelevant files",
+  "fixture": "evals/heldout/fixtures/usergroups",
+  "issue": "A user holding both the viewer and admin roles loses access: effective permissions should be the union of all their roles, but extra roles currently reduce the permission set.",
+  "ground_truth_files": [
+    "auth/permissions.py"
+  ],
+  "reference_fix": {
+    "path": "auth/permissions.py",
+    "old": "        granted &= permissions_for(role)",
+    "new": "        granted |= permissions_for(role)"
+  },
+  "max_steps": 30
+}

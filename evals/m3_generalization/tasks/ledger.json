@@ -1,0 +1,13 @@
+{
+  "id": "ledger",
+  "category": "state mutation (shared mutable default argument); uniquely named file in a nested package",
+  "fixture": "evals/m3_generalization/fixtures/ledger",
+  "issue": "Opening a second account shows the first account's transactions: a brand-new ledger already has a non-zero balance after deposits were recorded elsewhere.",
+  "ground_truth_files": ["bank/ledger.py"],
+  "reference_fix": {
+    "path": "bank/ledger.py",
+    "old": "    def __init__(self, entries=[]):\n        self.entries = entries",
+    "new": "    def __init__(self, entries=None):\n        self.entries = list(entries) if entries is not None else []"
+  },
+  "max_steps": 30
+}

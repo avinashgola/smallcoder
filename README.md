@@ -90,6 +90,12 @@ reports live in `results/baseline/`.
 | M2B — **held-out** | 96 runs, 8 unseen tasks | **5/48 → 29/48 (10% → 60%)**, p ≈ 4×10⁻⁷ | suite authored after the M2B freeze; no task regressed |
 | M3 path feedback | 96 runs, same 8 tasks | llama 13/24 → 19/24 (p = 0.125); qwen 18/24 → 17/24 (variance) | llama GT-file read rate 15/24 → 24/24 (p = 0.0016) |
 
+The quoted p-values are two-sided Fisher exact tests that treat individual
+runs as independent observations; trials are clustered within tasks (3 per
+task-cell), so these tests are descriptive rather than strictly valid
+inference. The preregistered follow-up study treats the task as the unit of
+analysis.
+
 Honest framing of each:
 
 - **M2B is the load-bearing result.** Its held-out effect (10% → 60%) is the
@@ -103,8 +109,9 @@ Honest framing of each:
   path feedback on, every one of llama's 24 runs read the file it needed
   (15/24 → 24/24, p = 0.0016) and file-not-found errors fell 275 → 55. The
   resulting solve-rate gain (13/24 → 19/24) is promising but **not
-  statistically established** at n=24. For qwen, which never hallucinates
-  paths, the code path never fired in 48 runs — M3 is a strict no-op there.
+  statistically established** at n=24. qwen produced zero file-not-found
+  errors in this study, so the M3 code path never fired in its 48 runs —
+  a strict no-op for qwen on these tasks.
 - **Suite provenance caveat for M3:** the eight-task suite was held out for
   M2B, but M3 was designed from the analysis of M2B's failures on those same
   tasks, so for M3 it is an evaluation/design set, not held-out evidence. An
@@ -178,6 +185,8 @@ No host, model, or credential is hard-coded. Never commit `.env`.
   pagination, configload, storecart, csvparse) used to develop M2A/M2B.
 - `evals/heldout/tasks/` + `evals/heldout/fixtures/` — 8 tasks authored after
   the M2B freeze (held out for M2B; reused as M3's evaluation/design set).
+- `evals/m3_generalization/` — 12 preregistered tasks frozen before any model
+  run, for the pending independent M3 generalization study.
 - `evals/run_benchmark.py` — ablation runner: one JSON row per run appended to
   `results/benchmarks/<study>/rows.jsonl`.
 - `evals/analyze_rows.py` — stdlib-only analyzer that recomputes cell sizes,
@@ -251,6 +260,7 @@ ruff check .
    residual-failure analysis; llama GT-file read rate 15/24 → 24/24
    (p = 0.0016), solve rate 13/24 → 19/24 (promising, not established);
    inert for qwen.
-5. **Next:** statistical power on the existing mechanisms (more trials/tasks)
-   and an independently frozen M3 generalization suite — before any new
-   runtime mechanism.
+5. **Next:** the independently frozen M3 generalization suite
+   (`evals/m3_generalization/`, 12 new tasks, preregistered in
+   `results/analysis/m3-generalization-preregistration.md`) — authored and
+   committed before any model saw it; the 240-run sweep has not been run yet.

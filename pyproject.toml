@@ -37,7 +37,12 @@ addopts = "-q"
 line-length = 100
 target-version = "py311"
 # Fixture projects are standalone target repos for the agent, not our codebase.
-extend-exclude = ["evals/fixtures", "evals/heldout/fixtures", "examples"]
+extend-exclude = [
+    "evals/fixtures",
+    "evals/heldout/fixtures",
+    "evals/m3_generalization/fixtures",
+    "examples",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

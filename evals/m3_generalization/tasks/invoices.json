@@ -1,0 +1,13 @@
+{
+  "id": "invoices",
+  "category": "boundary logic (missing clamp to zero); duplicate basename utils.py across two packages",
+  "fixture": "evals/m3_generalization/fixtures/invoices",
+  "issue": "A customer whose account credit exceeds the invoice gets billed a negative amount: a 30.00 invoice with a 50.00 credit produces -20.00 instead of 0.00.",
+  "ground_truth_files": ["billing/utils.py"],
+  "reference_fix": {
+    "path": "billing/utils.py",
+    "old": "    return round(total - credit, 2)",
+    "new": "    return round(max(total - credit, 0.0), 2)"
+  },
+  "max_steps": 30
+}

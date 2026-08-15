@@ -1,0 +1,13 @@
+{
+  "id": "backoff",
+  "category": "configuration/default behavior (explicit zero overridden by default); root-level file",
+  "fixture": "evals/m3_generalization/fixtures/backoff",
+  "issue": "Setting the retry base delay to 0 is supposed to mean retry immediately, but the client still waits: the schedule comes back as 0.5, 1.0, 2.0 seconds instead of all zeros.",
+  "ground_truth_files": ["backoff.py"],
+  "reference_fix": {
+    "path": "backoff.py",
+    "old": "    base_delay = base_delay or DEFAULT_BASE_DELAY",
+    "new": "    if base_delay is None:\n        base_delay = DEFAULT_BASE_DELAY"
+  },
+  "max_steps": 30
+}

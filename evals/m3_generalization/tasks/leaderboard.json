@@ -1,0 +1,13 @@
+{
+  "id": "leaderboard",
+  "category": "collection logic (sort direction); root-level file",
+  "fixture": "evals/m3_generalization/fixtures/leaderboard",
+  "issue": "The leaderboard highlights the worst games: after scores of 300, 120 and 950, the top-2 list shows the two lowest scores instead of 950 and 300.",
+  "ground_truth_files": ["leaderboard.py"],
+  "reference_fix": {
+    "path": "leaderboard.py",
+    "old": "    ranked = sorted(scores)",
+    "new": "    ranked = sorted(scores, reverse=True)"
+  },
+  "max_steps": 30
+}

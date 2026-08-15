@@ -1,0 +1,13 @@
+{
+  "id": "amounts",
+  "category": "parsing (thousands separators mishandled); uniquely named file in a nested package",
+  "fixture": "evals/m3_generalization/fixtures/amounts",
+  "issue": "Amounts typed with thousands separators break the importer: 1,234.56 raises an error and 2,500 is read as 2.5 instead of 2500.",
+  "ground_truth_files": ["finance/amounts.py"],
+  "reference_fix": {
+    "path": "finance/amounts.py",
+    "old": "    cleaned = cleaned.replace(\",\", \".\")",
+    "new": "    cleaned = cleaned.replace(\",\", \"\")"
+  },
+  "max_steps": 30
+}

@@ -1,0 +1,13 @@
+{
+  "id": "standings",
+  "category": "multi-file state mutation (symptom in scoreboard, defect in stats merge mutating shared defaults)",
+  "fixture": "evals/m3_generalization/fixtures/standings",
+  "issue": "League standings credit new teams with a previous team's results: a team with no recorded wins appears tied with the current leader, and season totals keep growing across reports.",
+  "ground_truth_files": ["game/stats.py"],
+  "reference_fix": {
+    "path": "game/stats.py",
+    "old": "    base.update(extra)\n    return base",
+    "new": "    merged = dict(base)\n    merged.update(extra)\n    return merged"
+  },
+  "max_steps": 30
+}

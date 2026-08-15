@@ -1,0 +1,13 @@
+{
+  "id": "semver",
+  "category": "parsing (lexicographic version comparison); root-level file",
+  "fixture": "evals/m3_generalization/fixtures/semver",
+  "issue": "The updater thinks version 1.10.0 is older than 1.9.0 and refuses to upgrade past any x.9.x release.",
+  "ground_truth_files": ["semver.py"],
+  "reference_fix": {
+    "path": "semver.py",
+    "old": "    return tuple(parts)",
+    "new": "    return tuple(int(part) for part in parts)"
+  },
+  "max_steps": 30
+}

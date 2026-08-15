@@ -1,0 +1,13 @@
+{
+  "id": "receipt",
+  "category": "multi-file behavior (symptom in receipt rendering, defect in money formatting)",
+  "fixture": "evals/m3_generalization/fixtures/receipt",
+  "issue": "Printed receipts drop zeros from prices: an item costing 5 dollars and 5 cents prints as 5.5 and a 12 dollar total prints as 12.0, so the amounts look wrong and columns no longer line up.",
+  "ground_truth_files": ["pos/money.py"],
+  "reference_fix": {
+    "path": "pos/money.py",
+    "old": "    return f\"{cents // 100}.{cents % 100}\"",
+    "new": "    return f\"{cents // 100}.{cents % 100:02d}\""
+  },
+  "max_steps": 30
+}

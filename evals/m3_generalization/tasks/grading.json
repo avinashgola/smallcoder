@@ -1,0 +1,13 @@
+{
+  "id": "grading",
+  "category": "boundary logic (inclusive grade cutoffs); root-level file",
+  "fixture": "evals/m3_generalization/fixtures/grading",
+  "issue": "A student who scored exactly 90 shows up with a B, and a student who scored exactly 60 is marked as failing. Scores that land exactly on a cutoff should earn the higher grade.",
+  "ground_truth_files": ["grading.py"],
+  "reference_fix": {
+    "path": "grading.py",
+    "old": "        if score > cutoff:",
+    "new": "        if score >= cutoff:"
+  },
+  "max_steps": 30
+}

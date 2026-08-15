@@ -1,0 +1,13 @@
+{
+  "id": "booking",
+  "category": "boundary logic (half-open interval overlap); uniquely named file in a nested package",
+  "fixture": "evals/m3_generalization/fixtures/booking",
+  "issue": "Booking a room at 10:00 immediately after a meeting that ends at 10:00 is rejected as a conflict even though the two bookings do not overlap.",
+  "ground_truth_files": ["scheduling/booking.py"],
+  "reference_fix": {
+    "path": "scheduling/booking.py",
+    "old": "    return start_a <= end_b and start_b <= end_a",
+    "new": "    return start_a < end_b and start_b < end_a"
+  },
+  "max_steps": 30
+}

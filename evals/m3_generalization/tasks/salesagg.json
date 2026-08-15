@@ -1,0 +1,13 @@
+{
+  "id": "salesagg",
+  "category": "data transformation (aggregation overwrites instead of accumulating); uniquely named file in a nested package",
+  "fixture": "evals/m3_generalization/fixtures/salesagg",
+  "issue": "Regional sales totals only reflect each region's most recent sale: recording 100 and then 50 for the north region reports north as 50 instead of 150.",
+  "ground_truth_files": ["analytics/aggregate.py"],
+  "reference_fix": {
+    "path": "analytics/aggregate.py",
+    "old": "        totals[region] = round(float(amount), 2)",
+    "new": "        totals[region] = round(totals.get(region, 0.0) + float(amount), 2)"
+  },
+  "max_steps": 30
+}

@@ -1,0 +1,13 @@
+{
+  "id": "notify",
+  "category": "data transformation (truncation exceeds channel limit); duplicate basename format.py across two channel packages",
+  "fixture": "evals/m3_generalization/fixtures/notify",
+  "issue": "Long alerts sent by text message come out at 163 characters, so the carrier splits them in two. Truncated messages must fit inside the 160-character limit including the trailing ellipsis.",
+  "ground_truth_files": ["messaging/sms/format.py"],
+  "reference_fix": {
+    "path": "messaging/sms/format.py",
+    "old": "        text = text[:SMS_LIMIT] + \"...\"",
+    "new": "        text = text[: SMS_LIMIT - 3] + \"...\""
+  },
+  "max_steps": 30
+}

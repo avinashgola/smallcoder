@@ -24,7 +24,7 @@ this repository, and this progress so far — what is the single next action?*
 Everything else — stepping, verification, retries, budgets, safety — is owned
 by the runtime.
 
-## Architecture (Milestone 1)
+## Architecture (current)
 
 ```
 issue ──> AgentRuntime (state machine)
@@ -37,39 +37,87 @@ issue ──> AgentRuntime (state machine)
              │
      ┌───────┴────────┬──────────────┬─────────────┐
  read_file      search_code      edit_file     run_command
- (line ranges)  (ripgrep/py)     (unique       (allowlist, no shell,
-                                  search/       timeout, truncation)
-                                  replace)
+ (line ranges,  (ripgrep/py)     (unique       (allowlist, no shell,
+  path feedback                   search/       timeout, truncation)
+  on bad paths)                   replace,
+                                  path feedback)
              │
-        model says "finish"
+   per step: loop detector (M2A) · stall-triggered verification (M2B)
+             │
+        model says "finish" — or the runtime verifies a stall
              ▼
    Deterministic verification: working tree changed? edited .py files
    compile? tests pass? — only then is the run a success.
 ```
 
-Key mechanics already in place:
+The Milestone 1 core (structured single-action steps, deterministic
+verification, repo sandbox, bounded stateless prompts, full JSONL
+trajectories) is unchanged; three flag-gated reliability mechanisms sit on
+top of it, each validated by its own ablation:
 
-- **Structured actions.** The model must emit one JSON object per step,
-  validated against typed Pydantic schemas. One reformat retry with the exact
-  parse error; repeated failures are counted (`structured_output_failures`)
-  and abort the run after 3 consecutive misses.
-- **Deterministic verification.** `finish` is a *request*, not a conclusion.
-  The runtime checks that the working tree actually changed, edited Python
-  files still compile, and the test command passes (explicit `--test-command`
-  or auto-detected pytest). Failed verification is fed back to the model as an
-  observation; after 3 rejected finishes the run fails.
-- **Repo sandbox.** All paths resolve through a single chokepoint that rejects
-  absolute paths, `..` traversal, symlink escapes, and `.git`. Commands run
-  without a shell, from an executable allowlist, with timeouts and output
-  truncation. SmallCoder never commits or pushes.
-- **Bounded context.** Each step's prompt is rebuilt from scratch: issue +
-  file listing + one-line summaries of old steps + the last few observations
-  verbatim, trimmed oldest-first to a character budget derived from
-  `SMALLCODER_CONTEXT_LIMIT` (~4 chars/token approximation, documented; a real
-  context engine is Milestone 3).
-- **Trajectories.** Every run writes `meta.json`, `trajectory.jsonl` (model
-  calls, steps, parse errors, verification), full tool outputs, and
-  `result.json` under `results/runs/<run-id>/`.
+- **M2A — loop detection** (`--loop-detector`, default on). Fingerprints
+  repeated identical actions (same action, arguments, working-tree diff hash,
+  and result signature) and intervenes with a bounded strategy reset that
+  preserves discoveries. Measured effect: it does **not** move solve rate
+  (2/30 → 3/30 across 60 runs — within noise) but cuts prompt tokens ~11% and
+  provides the stall signal M2B triggers on. Kept for those reasons, not for
+  solve rate.
+- **M2B — stall-triggered verification** (`--stall-verification`, default on).
+  When the tree has changed but the model hasn't requested `finish`, the
+  runtime periodically runs the same verification pipeline it would run at
+  finish time and completes the run itself if everything passes. This
+  converts "correct fix produced, never confirmed" — the dominant small-model
+  failure — into solves.
+- **M3 — path-resolution feedback** (`--path-feedback`, default on). When
+  `read_file`/`edit_file` gets a non-existent path, the error includes a
+  deterministic "Did you mean: `<path>`?" resolved from the real repository
+  files (exact then case-insensitive basename match, suffix-disambiguated).
+  The tool never redirects the operation; the model must retry explicitly.
+
+## Measured results
+
+All numbers come from ablation sweeps run by `evals/run_benchmark.py`
+(2 models × 2 arms × 3 trials per task; fresh git baseline per trial; a
+success requires the full deterministic verification pipeline to pass). Models
+under test: `llama3.1:latest` (8B Q4_K_M) and `qwen2.5-coder:7b` (7.6B
+Q4_K_M). Raw per-run rows are tracked under `results/benchmarks/`; full
+reports live in `results/baseline/`.
+
+| mechanism | study | solve rate | notes |
+| --- | --- | --- | --- |
+| M2A loop detection alone | 60 runs, 5 design tasks | 2/30 → 3/30 (noise) | prompt tokens −11%; kept as infrastructure |
+| M2B stall verification | 60 runs, 5 design tasks | 0/30 → 20/30, p ≈ 1.4×10⁻⁸ | steps −47%, prompt tokens −49% |
+| M2B — **held-out** | 96 runs, 8 unseen tasks | **5/48 → 29/48 (10% → 60%)**, p ≈ 4×10⁻⁷ | suite authored after the M2B freeze; no task regressed |
+| M3 path feedback | 96 runs, same 8 tasks | llama 13/24 → 19/24 (p = 0.125); qwen 18/24 → 17/24 (variance) | llama GT-file read rate 15/24 → 24/24 (p = 0.0016) |
+
+Honest framing of each:
+
+- **M2B is the load-bearing result.** Its held-out effect (10% → 60%) is the
+  one measured on tasks the mechanism was never tuned against. Every success
+  is a deterministic verification pass; in the design-set study all completions
+  were runtime-attributed, and on the held-out suite the runtime's early
+  verification sometimes *preempts* a finish the model would have reached — so
+  the correct claim is that the runtime reaches a verified stop sooner and far
+  more often, never that the models became better at judging completion.
+- **M3 fixes a model-specific tool-interaction failure completely** — with
+  path feedback on, every one of llama's 24 runs read the file it needed
+  (15/24 → 24/24, p = 0.0016) and file-not-found errors fell 275 → 55. The
+  resulting solve-rate gain (13/24 → 19/24) is promising but **not
+  statistically established** at n=24. For qwen, which never hallucinates
+  paths, the code path never fired in 48 runs — M3 is a strict no-op there.
+- **Suite provenance caveat for M3:** the eight-task suite was held out for
+  M2B, but M3 was designed from the analysis of M2B's failures on those same
+  tasks, so for M3 it is an evaluation/design set, not held-out evidence. An
+  independently frozen M3 generalization suite is future work.
+
+Reproduce the row-level tables from the tracked rows (stdlib only):
+
+```bash
+python -m evals.analyze_rows results/benchmarks/m3/rows.jsonl --expect-cell-size 24
+```
+
+(Ground-truth-file read rates and the M3 causal chain were derived from raw
+trajectories, which are not committed; the reports say so where it applies.)
 
 ## Quickstart
 
@@ -115,8 +163,28 @@ Everything is environment-driven (see [.env.example](.env.example)):
 | `SMALLCODER_COMMAND_TIMEOUT` | Seconds per command | `120` |
 | `SMALLCODER_ALLOWED_COMMANDS` | run_command allowlist | pytest, python, … |
 | `SMALLCODER_RUNS_DIR` | Trajectory output dir | `results/runs` |
+| `SMALLCODER_LOOP_DETECTOR` | M2A loop detection | on |
+| `SMALLCODER_STALL_VERIFICATION` | M2B stall-triggered verification | on |
+| `SMALLCODER_STALL_CHECK_INTERVAL` | Steps between stall checks | `5` |
+| `SMALLCODER_PATH_FEEDBACK` | M3 path-resolution feedback | on |
 
+Each mechanism also has a CLI ablation flag (`--loop-detector/--no-loop-detector`,
+`--stall-verification/--no-stall-verification`, `--path-feedback/--no-path-feedback`).
 No host, model, or credential is hard-coded. Never commit `.env`.
+
+## Evaluation
+
+- `evals/tasks/` + `evals/fixtures/` — the 5-task design suite (demo-auth,
+  pagination, configload, storecart, csvparse) used to develop M2A/M2B.
+- `evals/heldout/tasks/` + `evals/heldout/fixtures/` — 8 tasks authored after
+  the M2B freeze (held out for M2B; reused as M3's evaluation/design set).
+- `evals/run_benchmark.py` — ablation runner: one JSON row per run appended to
+  `results/benchmarks/<study>/rows.jsonl`.
+- `evals/analyze_rows.py` — stdlib-only analyzer that recomputes cell sizes,
+  solve rates, per-task solves, metric means, and Fisher exact p-values from
+  a tracked rows file, with duplicate-key detection and cell-size validation.
+- `results/baseline/` — curated study reports; `results/analysis/` — the
+  residual-failure analysis that motivated M3.
 
 ## Development
 
@@ -125,7 +193,7 @@ pytest        # unit + e2e tests (mocked inference; no Ollama needed)
 ruff check .
 ```
 
-## Design decisions (Milestone 1)
+## Design decisions
 
 - **Exact-unique search/replace edits** instead of unified diffs: small models
   malform diff hunks frequently; "old_text must match exactly once" gives
@@ -139,30 +207,50 @@ ruff check .
   and prose as a last line of defense.
 - **The runtime owns the loop.** Step limits, retry limits, finish limits, and
   verification are hard-coded control flow, not prompt suggestions.
+- **Every mechanism ships behind an ablation flag** and is judged by an A/B
+  sweep with tracked raw rows, not by anecdote. Mechanisms that fail to move
+  the primary metric are documented as such (M2A).
 
 ## Limitations (current, honest)
 
-- Context management is a naive char-budget truncation, not the planned
-  keep/compress/drop engine (Milestone 3).
-- No repository localization yet: the model sees a flat file listing and must
-  search on its own (Milestone 2).
-- No loop detection or failure-classification-driven recovery yet
-  (Milestone 4). A model that thrashes will burn its step budget.
+- **Small studies.** All ablation cells are n = 15–24 runs on 5–8 small
+  single-defect Python fixtures with two <12B models. Effects with p-values
+  quoted above are real on these tasks; magnitudes are not precise estimates,
+  and nothing here demonstrates generality to larger repositories or other
+  languages.
+- **M3's solve-rate effect is not statistically established** (p = 0.125),
+  and its evaluation suite was not independently held out for M3 (see suite
+  provenance above).
+- **A rescue is only as trustworthy as the fixture's tests.** Runtime-verified
+  completion inherits whatever the task's test suite fails to check.
+- **Residual failures are mostly genuine reasoning failures** — wrong
+  implementations produced after the model has read the correct file — which
+  no runtime mechanism so far addresses.
+- Context management is a naive char-budget truncation; token accounting uses
+  a ~4 chars/token approximation for budgeting (real usage numbers come from
+  Ollama's response counters).
 - Verification auto-detection only knows pytest; other stacks need
   `--test-command`.
-- Token accounting uses a ~4 chars/token approximation for budgeting (real
-  usage numbers come from Ollama's response counters).
 - Command allowlisting limits blast radius but is not a security sandbox;
   arbitrary Python executed via tests can still do arbitrary things. Run on
   repositories you trust, ideally in a container.
 
-## Roadmap
+## Milestone history
 
-1. ~~**Milestone 1** — end-to-end baseline: runtime, tools, verification, CLI, trajectories~~ (this release)
-2. **Milestone 2** — repository localization (repo map, deterministic candidate ranking)
-3. **Milestone 3** — context engine (keep/compress/drop policy, budget accounting)
-4. **Milestone 4** — reliability (failure taxonomy, loop detection, bounded recovery)
-5. **Milestone 5** — evaluation harness (task fixtures, ablation flags, metrics)
-
-No performance claims will appear here until the Milestone 5 harness produces
-them.
+1. **M1 — end-to-end baseline** (done): runtime, 4 tools, structured actions,
+   deterministic verification, CLI, trajectories. Small-model baselines on the
+   demo task: llama3.1 8B 0/10, qwen2.5-coder 7B 0/10 — motivating everything
+   after.
+2. **M2A — loop detection** (done): weak/negative on solve rate (2/30 → 3/30),
+   ~11% prompt-token reduction; kept as infrastructure. Its failure analysis
+   located the real bottleneck: models produce correct fixes but never
+   request `finish`.
+3. **M2B — stall-triggered verification** (done): 0/30 → 20/30 on the design
+   suite; **5/48 → 29/48 (10% → 60%)** on 8 genuinely held-out tasks.
+4. **M3 — path-resolution feedback** (done): designed from the held-out
+   residual-failure analysis; llama GT-file read rate 15/24 → 24/24
+   (p = 0.0016), solve rate 13/24 → 19/24 (promising, not established);
+   inert for qwen.
+5. **Next:** statistical power on the existing mechanisms (more trials/tasks)
+   and an independently frozen M3 generalization suite — before any new
+   runtime mechanism.

@@ -1,11 +1,23 @@
 # Milestone 3 ablation: deterministic path-resolution feedback
 
 **Date:** 2026-08-15
-**Design:** 2 models × 2 arms × 8 held-out tasks × 3 trials = **96 runs**, all
+**Design:** 2 models × 2 arms × 8 tasks × 3 trials = **96 runs**, all
 at commit `d50b1aa`. Arm A = frozen M2B (loop detection ON, stall verification
 ON, path feedback OFF). Arm B = identical plus path feedback ON. Path feedback
 is the only variable; no prompt, planning, context, stall-verification,
 loop-threshold, or benchmark-task change was made.
+
+**Suite provenance — read before interpreting.** The eight tasks in
+`evals/heldout/tasks` were authored after the M2B freeze and are a genuine
+held-out suite *for M2B*. For M3 they are **not** held out: M3 was designed
+from the residual-failure analysis of M2B's failures on these very tasks
+(`results/analysis/residual-failures-m2b.md`), so this study reuses the suite
+as M3's **evaluation/design set**. The A/B comparison is still a valid
+controlled measurement of the mechanism's causal effect on these tasks — both
+arms ran fresh at the same commit with one flag flipped — but it is not
+independent evidence that M3 generalizes beyond them. An independently
+authored M3 generalization suite, frozen after the M3 implementation, remains
+future work.
 
 ## Implementation
 
@@ -119,10 +131,25 @@ mechanism, since M2B and M3 both currently rest on n=24 cells.
 
 Commit `d50b1aa` · Python 3.12.10 · `llama3.1:latest` (8.0B Q4_K_M),
 `qwen2.5-coder:7b` (7.6B Q4_K_M) · context limit 12000 · max steps 30 · stall
-interval 5 · loop thresholds 3/6/2 · held-out task suite `evals/heldout/tasks`
-· fresh git baseline per trial. Raw rows: `results/benchmarks/m3/rows.jsonl`
-(96). Command: `python -m evals.run_benchmark --model MODEL --loop-detector on
+interval 5 · loop thresholds 3/6/2 · task suite `evals/heldout/tasks` (held
+out for M2B, reused as M3's evaluation/design set — see suite provenance
+above) · fresh git baseline per trial. Raw rows:
+`results/benchmarks/m3/rows.jsonl` (96). Command:
+`python -m evals.run_benchmark --model MODEL --loop-detector on
 --stall-verification on --path-feedback on|off --trials 3 --tasks-dir
 evals/heldout/tasks --out results/benchmarks/m3/rows.jsonl`.
-The 5-task design suite was **not** run; the held-out suite was specified as
-primary and its result is unambiguous.
+The original 5-task M2A/M2B design suite was **not** run;
+`evals/heldout/tasks` was specified as this study's primary suite.
+
+Row-level tables (cell sizes, solve rates, per-task solves, metric means, and
+the Fisher p-values on solve rate) can be recomputed from the tracked rows
+alone:
+
+```
+python -m evals.analyze_rows results/benchmarks/m3/rows.jsonl --expect-cell-size 24
+```
+
+The GT-file read rates, the suggestion → read → solve causal chain, and the
+per-run narratives above were derived from `trajectory.jsonl` files under
+`results/runs/`, which are gitignored (they can contain endpoint strings from
+outages); those claims are not recomputable from `rows.jsonl`.

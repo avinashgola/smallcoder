@@ -282,3 +282,144 @@ def test_analyze_reports_ambiguous_tasks_separately(tmp_path):
     assert result["design"]["ambiguous_candidate_tasks"] == ["invoices", "notify"]
     for task in ("invoices", "notify"):
         assert task in result["per_model"][MODELS[0]]["per_task"]
+
+
+# ------------------------------------------------ resume/provenance hardening
+#
+# The sweep is long, restartable, and runs against an intermittently reachable
+# host. These cover the failure modes that would silently corrupt the study
+# rather than stop it: a half-written row, an edited frozen plan, a failed
+# metadata probe erasing unrecoverable provenance, and a resume from the wrong
+# working directory splitting rows from their trajectories.
+
+import httpx
+
+from evals.run_m3_generalization import (
+    ROOT,
+    _endpoint_secrets,
+    load_plan,
+    load_rows,
+    run_sweep,
+    write_environment_meta,
+)
+
+
+class _Settings:
+    force_ipv4 = False
+    base_url = "http://192.0.2.10:11434"
+    runs_dir = Path("results/runs")
+
+
+def test_load_rows_reports_a_truncated_line_recoverably(tmp_path, monkeypatch):
+    rows_path = tmp_path / "rows.jsonl"
+    rows_path.write_text('{"a": 1}\n{"b": 2}\n{"c": ')  # killed mid-write
+    monkeypatch.setattr("evals.run_m3_generalization.ROWS_PATH", rows_path)
+    with pytest.raises(SystemExit) as exc:
+        load_rows()
+    assert "line 3" in str(exc.value)
+    assert "resume" in str(exc.value)
+
+
+def test_load_plan_rejects_an_internally_inconsistent_plan(tmp_path, monkeypatch):
+    plan = build_plan(TASK_IDS)
+    plan["entries"][0]["trial"] = 99  # tamper, leave the recorded fingerprint alone
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan))
+    monkeypatch.setattr("evals.run_m3_generalization.PLAN_PATH", plan_path)
+    with pytest.raises(SystemExit, match="internally inconsistent"):
+        load_plan()
+
+
+def test_load_plan_accepts_the_frozen_plan(tmp_path, monkeypatch):
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(build_plan(TASK_IDS)))
+    monkeypatch.setattr("evals.run_m3_generalization.PLAN_PATH", plan_path)
+    assert load_plan()["fingerprint"] == plan_fingerprint(build_plan(TASK_IDS))
+
+
+def _fake_httpx(monkeypatch, digest, version="0.21.0"):
+    class _Response:
+        def __init__(self, payload):
+            self._payload = payload
+
+        def json(self):
+            return self._payload
+
+    class _Client:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def get(self, url):
+            if url.endswith("/api/version"):
+                return _Response({"version": version})
+            return _Response({"models": [{"name": MODELS[0], "digest": digest}]})
+
+    monkeypatch.setattr(httpx, "Client", _Client)
+
+
+def test_environment_meta_survives_a_failed_probe(tmp_path, monkeypatch):
+    """A resume during an outage must not erase digests it cannot re-probe."""
+    meta_path = tmp_path / "meta.json"
+    recorded = {"a" * 8: "1" * 64, "b" * 8: "2" * 64}
+    meta_path.write_text(json.dumps({"models": recorded, "ollama_version": "0.21.0"}))
+    monkeypatch.setattr("evals.run_m3_generalization.META_PATH", meta_path)
+
+    def _boom(*args, **kwargs):
+        raise RuntimeError("host unreachable")
+
+    monkeypatch.setattr(httpx, "Client", _boom)
+    write_environment_meta(_Settings())
+
+    after = json.loads(meta_path.read_text())
+    assert after["models"] == recorded
+    assert after["ollama_version"] == "0.21.0"
+    assert after["runs_dir"] == "results/runs"
+    assert _Settings.base_url not in meta_path.read_text()
+
+
+def test_environment_meta_aborts_when_a_model_digest_changes(tmp_path, monkeypatch):
+    """Swapped model weights invalidate the frozen design — stop, don't resume."""
+    meta_path = tmp_path / "meta.json"
+    meta_path.write_text(json.dumps({"models": {MODELS[0]: "f" * 64}}))
+    monkeypatch.setattr("evals.run_m3_generalization.META_PATH", meta_path)
+    _fake_httpx(monkeypatch, digest="e" * 64)
+    with pytest.raises(SystemExit, match="changed digest mid-study"):
+        write_environment_meta(_Settings())
+
+
+def test_environment_meta_records_an_unchanged_digest(tmp_path, monkeypatch):
+    meta_path = tmp_path / "meta.json"
+    meta_path.write_text(json.dumps({"models": {MODELS[0]: "f" * 64}}))
+    monkeypatch.setattr("evals.run_m3_generalization.META_PATH", meta_path)
+    _fake_httpx(monkeypatch, digest="f" * 64, version="0.21.0")
+    write_environment_meta(_Settings())
+    after = json.loads(meta_path.read_text())
+    assert after["models"][MODELS[0]] == "f" * 64
+    assert after["ollama_version"] == "0.21.0"
+
+
+def test_sweep_refuses_to_resume_from_another_working_directory(tmp_path, monkeypatch):
+    """rows.jsonl is repo-anchored; trajectories are cwd-relative. Never split them."""
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(SystemExit, match="repository root"):
+        run_sweep()
+    assert Path.cwd().resolve() != ROOT
+
+
+def test_endpoint_secrets_cover_url_credentials():
+    class _WithCreds:
+        base_url = "http://user:pw@10.0.0.5:11434"
+
+    secrets = _endpoint_secrets(_WithCreds())
+    assert "user" in secrets and "pw" in secrets and "10.0.0.5" in secrets
+
+
+def test_sanitize_row_scrubs_dict_keys_as_well_as_values():
+    row = {"error": {"10.0.0.5": "refused"}}
+    assert sanitize_row(row, ["10.0.0.5"]) == {"error": {"<endpoint>": "refused"}}

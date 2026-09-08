@@ -119,6 +119,15 @@ def load_plan() -> dict:
     if not PLAN_PATH.is_file():
         raise SystemExit(f"no plan at {PLAN_PATH}; run --write-plan first")
     plan = json.loads(PLAN_PATH.read_text())
+    try:
+        recomputed = plan_fingerprint(plan)
+    except (KeyError, TypeError) as exc:
+        raise SystemExit(f"{PLAN_PATH} is missing required plan fields ({exc})") from exc
+    if recomputed != plan.get("fingerprint"):
+        raise SystemExit(
+            f"{PLAN_PATH} is internally inconsistent: its entries no longer hash to its "
+            "recorded fingerprint, so the frozen plan has been edited or corrupted"
+        )
     rebuilt = build_plan(plan["tasks"])
     if plan.get("fingerprint") != rebuilt["fingerprint"]:
         raise SystemExit("plan.json does not match the frozen schedule (seed/tasks changed?)")
@@ -144,16 +153,24 @@ def completed_keys(plan: dict, rows: list[dict]) -> set[tuple]:
 def load_rows() -> list[dict]:
     if not ROWS_PATH.is_file():
         return []
-    return [json.loads(line) for line in ROWS_PATH.read_text().splitlines() if line.strip()]
+    rows = []
+    for lineno, line in enumerate(ROWS_PATH.read_text().splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError as exc:
+            raise SystemExit(
+                f"{ROWS_PATH}: line {lineno} is not valid JSON ({exc.msg}). A truncated "
+                "trailing line means the sweep was killed mid-write; delete that one line "
+                "and resume -- the run it belongs to is simply re-run."
+            ) from exc
+    return rows
 
 
 def _endpoint_secrets(settings) -> list[str]:
     parts = urlsplit(settings.base_url)
-    secrets = [settings.base_url]
-    if parts.netloc:
-        secrets.append(parts.netloc)
-    if parts.hostname:
-        secrets.append(parts.hostname)
+    secrets = [settings.base_url, parts.netloc, parts.hostname, parts.username, parts.password]
     return [s for s in secrets if s]
 
 
@@ -166,7 +183,7 @@ def sanitize_row(row: dict, secrets: list[str]) -> dict:
         if isinstance(value, list):
             return [scrub(v) for v in value]
         if isinstance(value, dict):
-            return {k: scrub(v) for k, v in value.items()}
+            return {scrub(k): scrub(v) for k, v in value.items()}
         return value
 
     return {k: scrub(v) for k, v in row.items()}
@@ -185,17 +202,42 @@ def write_environment_meta(settings) -> None:
     from smallcoder.models.ollama import ForceIPv4Transport
 
     meta = {"python": platform.python_version(), "models": {}}
+    if META_PATH.is_file():
+        try:
+            previous = json.loads(META_PATH.read_text())
+        except json.JSONDecodeError:
+            previous = {}
+        if isinstance(previous, dict):
+            meta = {**previous, **meta}
+            meta["models"] = dict(previous.get("models") or {})
+
+    probed: dict[str, str] = {}
+    version = None
     transport = ForceIPv4Transport() if settings.force_ipv4 else None
     try:
         with httpx.Client(timeout=10, transport=transport) as client:
             version = client.get(settings.base_url + "/api/version").json().get("version")
-            meta["ollama_version"] = version
             tags = client.get(settings.base_url + "/api/tags").json().get("models", [])
             for entry in tags:
-                if entry.get("name") in MODELS:
-                    meta["models"][entry["name"]] = entry.get("digest")
+                if entry.get("name") in MODELS and entry.get("digest"):
+                    probed[entry["name"]] = entry["digest"]
     except Exception:
         pass  # metadata is optional; never block or leak on failure
+
+    for name, digest in probed.items():
+        recorded = meta["models"].get(name)
+        if recorded and recorded != digest:
+            raise SystemExit(
+                f"model {name} changed digest mid-study ({recorded[:12]} -> {digest[:12]}). "
+                "The preregistration freezes model tags and quantizations, so this is a "
+                "stop-the-sweep condition, not something to resume through."
+            )
+        meta["models"][name] = digest
+    if version:
+        meta["ollama_version"] = version
+    runs_dir = Path(settings.runs_dir)
+    if not runs_dir.is_absolute():
+        meta["runs_dir"] = runs_dir.as_posix()
     META_PATH.write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
 
 
@@ -207,6 +249,12 @@ def run_sweep() -> int:
     from evals.run_benchmark import load_tasks, run_one, wait_for_server
     from smallcoder.config import load_settings
 
+    if Path.cwd().resolve() != ROOT:
+        raise SystemExit(
+            f"run the sweep from the repository root ({ROOT}). rows.jsonl is repo-anchored "
+            "but trajectories resolve against the working directory, so resuming from "
+            "elsewhere would split them and make the GT-read outcome unextractable."
+        )
     plan = load_plan()
     tasks = {t["id"]: t for t in load_tasks(None, TASKS_DIR)}
     if set(tasks) != set(plan["tasks"]):

@@ -237,3 +237,41 @@ def test_with_completion_rescues_a_silent_success(env):
     assert row["stop_reason"] == "verified_stall_rescue"
     assert row["completion_mode"] == "runtime_rescued"
     assert row["success"] is True
+
+
+# ------------------------------------------------ anytime replay agreement
+
+
+def test_replay_finds_a_fix_that_the_terminal_state_also_verifies(env):
+    """Regression: the replay baseline must be the CLEAN tree.
+
+    Re-snapshotting an already-edited replay copy records the run's own edits as
+    pre-existing dirt, so changed_since() returns nothing and every snapshot is
+    silently scored unverified — verified_ever=0 on a run that demonstrably
+    passed. That is invisible in the output and would have understated the
+    control arm on the study's own fairness metric.
+    """
+    from evals.replay_verify import replay_run
+
+    repo, settings, logger = env
+    model = MockModelClient([
+        act("edit_file", path="backoff.py", old_text=BROKEN, new_text=FIXED),
+    ] + [act("read_file", path="backoff.py")] * 40)
+    row = run_generic_loop(repo, ISSUE, model, settings, logger)
+    assert row["verified_final"] == 1
+
+    replayed = replay_run(logger.run_dir, settings)
+    assert replayed["verified_ever"] == 1, "replay disagrees with the terminal-state verdict"
+    assert replayed["verified_checkpoint"] == 1
+    assert replayed["checkpoints"] >= 1
+
+
+def test_replay_reports_zero_for_a_run_that_never_fixed_anything(env):
+    from evals.replay_verify import replay_run
+
+    repo, settings, logger = env
+    model = MockModelClient([act("read_file", path="backoff.py")] * 40)
+    row = run_generic_loop(repo, ISSUE, model, settings, logger)
+    assert row["verified_final"] == 0
+    replayed = replay_run(logger.run_dir, settings)
+    assert replayed["verified_ever"] == 0 and replayed["verified_checkpoint"] == 0

@@ -37,11 +37,23 @@ import tempfile
 from pathlib import Path
 
 from smallcoder.config import load_settings
-from smallcoder.gitutils import changed_since, snapshot, working_tree_diff
+from smallcoder.gitutils import RepoSnapshot, changed_since, head_commit, working_tree_diff
 from smallcoder.recovery.loop_detector import diff_state_hash
 from smallcoder.verification.verifier import verify
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def clean_baseline(repo_root: Path) -> RepoSnapshot:
+    """The baseline the run was actually scored against.
+
+    ``prepare_repo`` commits the whole fixture, so at the moment the run started
+    the tree was clean and ``baseline.dirty_paths`` was empty. Re-snapshotting a
+    replayed copy would instead record the run's own edits as pre-existing dirt,
+    making ``changed_since`` return nothing and silently scoring every snapshot
+    as unverified.
+    """
+    return RepoSnapshot(head=head_commit(repo_root), dirty_paths=frozenset())
 
 
 def edits_up_to(trajectory: Path, step: int) -> list[str]:
@@ -75,18 +87,21 @@ def _verify_snapshot(snap: Path, settings, edited: list[str]) -> bool:
     with tempfile.TemporaryDirectory(prefix="smallcoder-replay-") as tmp:
         work = Path(tmp) / "repo"
         shutil.copytree(snap, work, symlinks=True)
-        base = snapshot(work)
-        # The snapshot carries the fixture's own baseline commit, so the
-        # baseline recomputed here is the same one the run was scored against.
-        return verify(work, settings, base, edited, None).passed
+        return verify(work, settings, clean_baseline(work), edited, None).passed
 
 
 def replay_run(run_dir: Path, settings) -> dict:
-    """Return anytime endpoints for one run directory."""
+    """Return anytime endpoints for one control run directory.
+
+    The tree is verified only when its diff hash actually moved: an identical
+    working tree gives an identical verdict, so skipping repeats is exact, not
+    an approximation. Most steps are reads, so this is what makes replaying 240
+    runs tractable.
+    """
     snap_dir = run_dir / "snapshots"
     trajectory = run_dir / "trajectory.jsonl"
     if not snap_dir.is_dir():
-        return {"verified_checkpoint": None, "verified_ever": None, "checkpoints": 0}
+        return {}
 
     steps = sorted(
         (int(p.name.split("_")[1]), p)
@@ -98,31 +113,36 @@ def replay_run(run_dir: Path, settings) -> dict:
     checkpoints = 0
     last_check_step = 0
     last_diff_hash: str | None = None
+    seen_hashes: dict[str, bool] = {}
 
     for step, snap in steps:
         if step == 0:
             continue
         edited = edits_up_to(trajectory, step)
-        # --- exploratory: every step
-        if not verified_ever and _verify_snapshot(snap, settings, edited):
-            verified_ever = 1
-        # --- headline: SmallCoder's own checkpoint gating, replayed
-        with tempfile.TemporaryDirectory(prefix="smallcoder-gate-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="smallcoder-replay-") as tmp:
             work = Path(tmp) / "repo"
             shutil.copytree(snap, work, symlinks=True)
-            base = snapshot(work)
+            base = clean_baseline(work)
             if not changed_since(work, base):
                 continue
-            if (step - last_check_step) < settings.stall_check_interval:
-                continue
             diff_hash = diff_state_hash(working_tree_diff(work))
-            if diff_hash == last_diff_hash:
-                continue
-            last_check_step, last_diff_hash = step, diff_hash
-            checkpoints += 1
-            passed = verify(work, settings, base, edited, None).passed
-        if passed and not verified_checkpoint:
-            verified_checkpoint = 1
+
+            # exploratory: any step, but an unchanged tree cannot change the verdict
+            if diff_hash in seen_hashes:
+                passed = seen_hashes[diff_hash]
+            else:
+                passed = verify(work, settings, base, edited, None).passed
+                seen_hashes[diff_hash] = passed
+            if passed:
+                verified_ever = 1
+
+            # headline: SmallCoder's own checkpoint gating, replayed exactly
+            due = (step - last_check_step) >= settings.stall_check_interval
+            if due and diff_hash != last_diff_hash:
+                last_check_step, last_diff_hash = step, diff_hash
+                checkpoints += 1
+                if passed:
+                    verified_checkpoint = 1
 
     return {
         "verified_checkpoint": verified_checkpoint,
@@ -149,10 +169,22 @@ def main(argv: list[str] | None = None) -> int:
     annotated = []
     for n, row in enumerate(rows, start=1):
         extra = replay_run(runs_dir / row["run_id"], settings)
+        if not extra:
+            # The treatment arm runs the unmodified AgentRuntime, which takes no
+            # snapshots -- but it performed this exact checkpoint gating LIVE and
+            # stopped at the first passing check, so its recorded success already
+            # IS the matched-checkpoint measure. verified_ever is not computable
+            # for it and is deliberately left absent rather than guessed.
+            extra = {
+                "verified_final": int(bool(row.get("success"))),
+                "verified_checkpoint": int(bool(row.get("success"))),
+                "checkpoints": None,
+            }
         annotated.append({**row, **extra})
-        print(f"[replay] {n}/{len(rows)} {row['run_id']} "
-              f"checkpoint={extra['verified_checkpoint']} ever={extra['verified_ever']} "
-              f"({extra['checkpoints']} checkpoints)", flush=True)
+        print(f"[replay] {n}/{len(rows)} {row['run_id']} arm={row.get('arm')} "
+              f"final={annotated[-1].get('verified_final')} "
+              f"checkpoint={extra['verified_checkpoint']} "
+              f"ever={extra.get('verified_ever', 'n/a')}", flush=True)
 
     with Path(args.out).open("w", encoding="utf-8") as fh:
         for row in annotated:

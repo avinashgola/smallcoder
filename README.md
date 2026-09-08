@@ -77,8 +77,9 @@ top of it, each validated by its own ablation:
 ## Measured results
 
 All numbers come from ablation sweeps run by `evals/run_benchmark.py`
-(2 models × 2 arms × 3 trials per task; fresh git baseline per trial; a
-success requires the full deterministic verification pipeline to pass). Models
+(2 models × 2 arms; 3 trials per task, or 5 in the preregistered
+generalization study; fresh git baseline per trial; a success requires the
+full deterministic verification pipeline to pass). Models
 under test: `llama3.1:latest` (8B Q4_K_M) and `qwen2.5-coder:7b` (7.6B
 Q4_K_M). Raw per-run rows are tracked under `results/benchmarks/`; full
 reports live in `results/baseline/`.
@@ -89,12 +90,15 @@ reports live in `results/baseline/`.
 | M2B stall verification | 60 runs, 5 design tasks | 0/30 → 20/30, p ≈ 1.4×10⁻⁸ | steps −47%, prompt tokens −49% |
 | M2B — **held-out** | 96 runs, 8 unseen tasks | **5/48 → 29/48 (10% → 60%)**, p ≈ 4×10⁻⁷ | suite authored after the M2B freeze; no task regressed |
 | M3 path feedback | 96 runs, same 8 tasks | llama 13/24 → 19/24 (p = 0.125); qwen 18/24 → 17/24 (variance) | llama GT-file read rate 15/24 → 24/24 (p = 0.0016) |
+| M3 — **preregistered, independent suite** | 240 runs, 12 frozen tasks | llama 22/60 → 23/60; qwen 16/60 → 18/60 — **null in both** | llama GT-read 56/60 → 60/60 (+0.067 [+0.000, +0.200]); the solve-rate gain did not replicate |
 
 The quoted p-values are two-sided Fisher exact tests that treat individual
-runs as independent observations; trials are clustered within tasks (3 per
-task-cell), so these tests are descriptive rather than strictly valid
-inference. The preregistered follow-up study treats the task as the unit of
-analysis.
+runs as independent observations; trials are clustered within tasks, so these
+tests are descriptive rather than strictly valid inference. The final row is
+different: that study was preregistered, treats the **task** as the unit of
+analysis, and reports task-cluster bootstrap intervals instead of a p-value
+headline. Its full write-up is
+[`results/analysis/m3-generalization-results.md`](results/analysis/m3-generalization-results.md).
 
 Honest framing of each:
 
@@ -105,17 +109,26 @@ Honest framing of each:
   verification sometimes *preempts* a finish the model would have reached — so
   the correct claim is that the runtime reaches a verified stop sooner and far
   more often, never that the models became better at judging completion.
-- **M3 fixes a model-specific tool-interaction failure completely** — with
-  path feedback on, every one of llama's 24 runs read the file it needed
-  (15/24 → 24/24, p = 0.0016) and file-not-found errors fell 275 → 55. The
-  resulting solve-rate gain (13/24 → 19/24) is promising but **not
-  statistically established** at n=24. qwen produced zero file-not-found
-  errors in this study, so the M3 code path never fired in its 48 runs —
-  a strict no-op for qwen on these tasks.
-- **Suite provenance caveat for M3:** the eight-task suite was held out for
-  M2B, but M3 was designed from the analysis of M2B's failures on those same
-  tasks, so for M3 it is an evaluation/design set, not held-out evidence. An
-  independently frozen M3 generalization suite is future work.
+- **M3 fixes a tool-interaction failure, and only that.** With path feedback
+  on, every llama run that received a suggestion followed one and then read
+  the file it needed — 11/11 in the first study, 9/9 in the independent one.
+  What did *not* replicate is the payoff: the first study saw 8 of those 11
+  runs go on to solve the task, the independent study saw **0 of 9**. On 12
+  tasks authored without the mechanism in view, llama already read the right
+  file in 93% of control runs, so the failure class M3 targets showed up in
+  only 2 of 12 tasks (and 0 of 12 for qwen, which emitted zero suggestions in
+  all 60 runs — the negative control replicating exactly). **M3 is kept, and
+  its claim is re-scoped:** it removes a specific degenerate failure — one
+  task burned 115 failed path lookups in the control arm — but it does not by
+  itself produce solved tasks, and it costs ~17% wall-clock on llama.
+- **Why the first M3 number was misleading, and how we knew to check.** The
+  eight-task suite was genuinely held out for M2B, but M3 was *designed from*
+  the analysis of M2B's failures on those same tasks — so for M3 it was an
+  evaluation set, not evidence. That caveat was in this README before the
+  follow-up ran; the preregistered 12-task study then confirmed it. This is
+  what preregistration is for: the mechanism looked better than it was on the
+  suite it was derived from, and only a frozen, independently authored suite
+  could show that.
 
 Reproduce the row-level tables from the tracked rows (stdlib only):
 
@@ -185,15 +198,24 @@ No host, model, or credential is hard-coded. Never commit `.env`.
   pagination, configload, storecart, csvparse) used to develop M2A/M2B.
 - `evals/heldout/tasks/` + `evals/heldout/fixtures/` — 8 tasks authored after
   the M2B freeze (held out for M2B; reused as M3's evaluation/design set).
-- `evals/m3_generalization/` — 12 preregistered tasks frozen before any model
-  run, for the pending independent M3 generalization study.
+- `evals/m3_generalization/` — 12 tasks frozen and committed before any model
+  run, for the preregistered independent M3 generalization study.
+- `evals/run_m3_generalization.py` — resume-safe scheduler for that study: a
+  fingerprinted 240-entry plan, deterministic run order, one retry on
+  infrastructure error, and endpoint scrubbing on every persisted row.
+- `evals/analyze_m3_generalization.py` — the preregistered analysis:
+  trajectory-derived ground-truth-read extraction plus a task-cluster
+  bootstrap, models never combined. Emits a sanitized per-run
+  `mechanism.jsonl` so the primary outcome stays checkable without the
+  uncommitted trajectories.
 - `evals/run_benchmark.py` — ablation runner: one JSON row per run appended to
   `results/benchmarks/<study>/rows.jsonl`.
 - `evals/analyze_rows.py` — stdlib-only analyzer that recomputes cell sizes,
   solve rates, per-task solves, metric means, and Fisher exact p-values from
   a tracked rows file, with duplicate-key detection and cell-size validation.
 - `results/baseline/` — curated study reports; `results/analysis/` — the
-  residual-failure analysis that motivated M3.
+  residual-failure analysis that motivated M3, plus the M3 generalization
+  preregistration and its results.
 
 ## Development
 
@@ -260,7 +282,16 @@ ruff check .
    residual-failure analysis; llama GT-file read rate 15/24 → 24/24
    (p = 0.0016), solve rate 13/24 → 19/24 (promising, not established);
    inert for qwen.
-5. **Next:** the independently frozen M3 generalization suite
-   (`evals/m3_generalization/`, 12 new tasks, preregistered in
-   `results/analysis/m3-generalization-preregistration.md`) — authored and
-   committed before any model saw it; the 240-run sweep has not been run yet.
+5. **M3 generalization study** (done): 240 preregistered runs on 12
+   independently frozen tasks. The mechanism replicated — 9/9 suggestions
+   followed, llama GT-read 56/60 → 60/60 — but the solve-rate gain did not
+   (22/60 → 23/60, interval spanning zero). Reported in full, including the
+   retraction, in
+   [`results/analysis/m3-generalization-results.md`](results/analysis/m3-generalization-results.md).
+   It also independently replicated M2B: of 240 runs only 4 completions were
+   model-initiated, and 75 of 79 successes were runtime-attributed.
+6. **Next:** the missing control. Every comparison so far is SmallCoder
+   against SmallCoder with a flag off — there is still no measurement against
+   a *generic* agent loop (free-form tool calls, model-managed context, model
+   decides when it is done) on the same model. That is the experiment the
+   project's central claim actually rests on.

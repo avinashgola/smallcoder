@@ -24,6 +24,18 @@ this repository, and this progress so far — what is the single next action?*
 Everything else — stepping, verification, retries, budgets, safety — is owned
 by the runtime.
 
+> **This hypothesis has now been tested against a control, and it did not
+> hold.** A generic agent loop — same model, same tools, same schema, but the
+> model owning its own context, stopping and recovery — matches SmallCoder on
+> the same 12 tasks (llama 24/60 vs 23/60; qwen 20/60 vs 22/60), in a
+> preregistered 360-run study. The result is formally *inconclusive* rather
+> than a refutation, because the design is underpowered by its own
+> preregistration — but it is not evidence of a win, and the project's claims
+> have been re-scoped accordingly. See
+> [`results/analysis/generic-loop-results.md`](results/analysis/generic-loop-results.md).
+> Everything below describes what was built and what each study actually
+> measured; read the honest-framing section before quoting any number.
+
 ## Architecture (current)
 
 ```
@@ -91,6 +103,7 @@ reports live in `results/baseline/`.
 | M2B — **held-out** | 96 runs, 8 unseen tasks | **5/48 → 29/48 (10% → 60%)**, p ≈ 4×10⁻⁷ | suite authored after the M2B freeze; no task regressed |
 | M3 path feedback | 96 runs, same 8 tasks | llama 13/24 → 19/24 (p = 0.125); qwen 18/24 → 17/24 (variance) | llama GT-file read rate 15/24 → 24/24 (p = 0.0016) |
 | M3 — **preregistered, independent suite** | 240 runs, 12 frozen tasks | llama 22/60 → 23/60; qwen 16/60 → 18/60 — **null in both** | llama GT-read 56/60 → 60/60 (+0.067 [+0.000, +0.200]); the solve-rate gain did not replicate |
+| **Generic-loop control** — preregistered | 360 runs, 12 tasks, 3 arms | SmallCoder **23/60 vs generic 24/60** (llama); **22/60 vs 20/60** (qwen) | the missing control: no detectable runtime advantage; adding the completion machinery to the generic loop made it *worse* (19/60, 14/60) |
 
 The quoted p-values are two-sided Fisher exact tests that treat individual
 runs as independent observations; trials are clustered within tasks, so these
@@ -102,13 +115,21 @@ headline. Its full write-up is
 
 Honest framing of each:
 
-- **M2B is the load-bearing result.** Its held-out effect (10% → 60%) is the
-  one measured on tasks the mechanism was never tuned against. Every success
-  is a deterministic verification pass; in the design-set study all completions
-  were runtime-attributed, and on the held-out suite the runtime's early
-  verification sometimes *preempts* a finish the model would have reached — so
-  the correct claim is that the runtime reaches a verified stop sooner and far
-  more often, never that the models became better at judging completion.
+- **M2B's number is real; its interpretation was wrong.** The held-out
+  10% → 60% is a valid comparison of SmallCoder-with-stall-verification against
+  SmallCoder-without. It does **not** show that the runtime beats an agent that
+  has no runtime — and the control study finds it does not.
+- **The premise M2B was built on does not survive a control.** M2B exists
+  because the trajectories showed small models producing correct fixes and
+  never calling `finish`: llama 2/60, qwen 0/60. Run the *same models* on the
+  *same tasks* in a loop without the runtime and they call `finish` 43/60 and
+  22/60 — and are usually right (24 and 20 correct claims). "Small models
+  cannot judge when they are done" was measured entirely inside the harness
+  built on that assumption. Part of the gap is quantified right-censoring:
+  llama's median stall-rescue step is 5, the earliest one can fire, while the
+  control's median `finish` step is 11, so the runtime routinely ends the run
+  about six steps before the model would have called it. **That claim is
+  withdrawn.**
 - **M3 fixes a tool-interaction failure, and only that.** With path feedback
   on, every llama run that received a suggestion followed one and then read
   the file it needed — 11/11 in the first study, 9/9 in the independent one.
@@ -210,6 +231,11 @@ No host, model, or credential is hard-coded. Never commit `.env`.
   uncommitted trajectories.
 - `evals/run_benchmark.py` — ablation runner: one JSON row per run appended to
   `results/benchmarks/<study>/rows.jsonl`.
+- `evals/generic_loop.py` — the generic agent-loop control arm: same model,
+  tools and schema, but the model owns context, stopping and recovery. Plus
+  `evals/run_generic_study.py` (360-run scheduler), `evals/replay_verify.py`
+  (offline anytime scoring, so both arms are scored by one estimator) and
+  `evals/normalize_arms.py` (makes the arms' fields mean the same thing).
 - `evals/analyze_rows.py` — stdlib-only analyzer that recomputes cell sizes,
   solve rates, per-task solves, metric means, and Fisher exact p-values from
   a tracked rows file, with duplicate-key detection and cell-size validation.
@@ -274,10 +300,12 @@ ruff check .
    after.
 2. **M2A — loop detection** (done): weak/negative on solve rate (2/30 → 3/30),
    ~11% prompt-token reduction; kept as infrastructure. Its failure analysis
-   located the real bottleneck: models produce correct fixes but never
-   request `finish`.
+   located what looked like the real bottleneck: models produce correct fixes
+   but never request `finish`. Milestone 6 showed that observation was itself
+   an artifact of this harness.
 3. **M2B — stall-triggered verification** (done): 0/30 → 20/30 on the design
-   suite; **5/48 → 29/48 (10% → 60%)** on 8 genuinely held-out tasks.
+   suite; **5/48 → 29/48 (10% → 60%)** on 8 genuinely held-out tasks. Valid
+   within-harness; see milestone 6 for what it does *not* show.
 4. **M3 — path-resolution feedback** (done): designed from the held-out
    residual-failure analysis; llama GT-file read rate 15/24 → 24/24
    (p = 0.0016), solve rate 13/24 → 19/24 (promising, not established);
@@ -290,8 +318,18 @@ ruff check .
    [`results/analysis/m3-generalization-results.md`](results/analysis/m3-generalization-results.md).
    It also independently replicated M2B: of 240 runs only 4 completions were
    model-initiated, and 75 of 79 successes were runtime-attributed.
-6. **Next:** the missing control. Every comparison so far is SmallCoder
-   against SmallCoder with a flag off — there is still no measurement against
-   a *generic* agent loop (free-form tool calls, model-managed context, model
-   decides when it is done) on the same model. That is the experiment the
-   project's central claim actually rests on.
+6. **Generic-loop control** (done): the missing control, and the most
+   important result in the project. 360 preregistered runs, three arms
+   interleaved. A generic loop with the same model and tools **matches**
+   SmallCoder (llama 24/60 vs 23/60, qwen 20/60 vs 22/60); asking "would the
+   completion machinery have completed the control's runs?" gives 24/60 vs
+   23/60 and 20/60 vs 22/60 — dead even; and giving the generic loop that
+   machinery made it *worse*. Formally inconclusive (underpowered by
+   preregistration), but no evidence of a runtime advantage. Full write-up and
+   retractions in
+   [`results/analysis/generic-loop-results.md`](results/analysis/generic-loop-results.md).
+7. **Next:** the Tier-3 `B-prime` cell — SmallCoder run with the control's
+   prompt — which is what separates the two live explanations for the
+   finish-rate gap (the suppressing prompt sentence vs right-censoring by stall
+   verification). Beyond that, a larger suite: the drift check showed
+   within-arm variance of the same order as the effects being chased.

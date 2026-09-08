@@ -92,8 +92,28 @@ def test_tampered_runs_never_count_as_solved_in_any_arm():
     assert solved(forged, "verified_final") == 0
 
 
-def test_missing_anytime_endpoint_scores_zero_not_crash():
-    assert solved({"verified_final": 1}, "verified_checkpoint") == 0
+def test_unmeasured_endpoint_is_none_not_zero():
+    """An endpoint one arm cannot measure must never be reported as a zero.
+
+    verified_ever needs per-step snapshots and the treatment arm takes none, so
+    scoring it 0/60 would invent a catastrophic result for that arm and make
+    every comparison against it meaningless.
+    """
+    assert solved({"verified_final": 1}, "verified_checkpoint") is None
+    assert solved({"verified_checkpoint": 0}, "verified_checkpoint") == 0
+
+
+def test_unmeasurable_outcomes_are_not_differenced(tmp_path):
+    plan, rows, _, _ = build_synthetic_study(tmp_path)
+    for row in rows:
+        if row["arm"] == "S":
+            row.pop("verified_ever")
+    result = analyze(rows, plan, 100)
+    for model in MODELS:
+        comp = result["per_model"][model]["comparisons"]["smallcoder_vs_generic"]
+        assert comp["verified_ever"].get("unavailable") is True
+        assert "cluster_bootstrap" not in comp["verified_ever"]
+        assert comp["verified_final"].get("unavailable") is None
 
 
 def build_synthetic_study(tmp_path, treatment_hits=4, control_hits=1):

@@ -87,18 +87,35 @@ def check_rows_against_plan(plan: dict, rows: list[dict]) -> None:
         )
 
 
-def solved(row: dict, outcome: str) -> int:
+def solved(row: dict, outcome: str) -> int | None:
     """One success definition, applied identically to every arm.
+
+    Returns ``None`` when the endpoint was never *measured* for this row, which
+    is different from a measured zero. `verified_ever` requires per-step
+    snapshots, and the treatment arm runs the unmodified runtime, which takes
+    none — reporting that as 0/60 would invent a catastrophic result for the
+    arm and make every comparison against it meaningless.
 
     The integrity rule is part of the definition: a run that edited the
     fixture's own tests forged the oracle and is never a solve.
     """
-    if row.get("tampered"):
-        return 0
     value = row.get(outcome)
     if value is None:
+        return None
+    if row.get("tampered"):
         return 0
     return 1 if value else 0
+
+
+def cell_hits(cell: list[dict], outcome: str) -> dict:
+    """Hits over the rows where the outcome was measured at all."""
+    scored = [solved(r, outcome) for r in cell]
+    measured = [v for v in scored if v is not None]
+    return {
+        "hits": sum(measured),
+        "n": len(measured),
+        "measured": len(measured) == len(cell) and bool(cell),
+    }
 
 
 def sign_test(diffs: list[float]) -> dict:
@@ -146,8 +163,7 @@ def analyze(rows: list[dict], plan: dict, resamples: int) -> dict:
         for config in configs:
             cell = [r for r in rows if r["model"] == model and r["config"] == config]
             block["arm_totals"][config] = {
-                outcome: {"hits": sum(solved(r, outcome) for r in cell), "n": len(cell)}
-                for outcome in OUTCOMES
+                outcome: cell_hits(cell, outcome) for outcome in OUTCOMES
             }
             block["exploratory"][config] = {
                 name: sum(int(r.get(name) or 0) for r in cell) for name in EXPLORATORY_COUNTS
@@ -168,7 +184,7 @@ def analyze(rows: list[dict], plan: dict, resamples: int) -> dict:
             for config in configs:
                 cell = [r for r in rows
                         if r["model"] == model and r["config"] == config and r["task"] == task]
-                entry[config] = {o: sum(solved(r, o) for r in cell) for o in OUTCOMES}
+                entry[config] = {o: cell_hits(cell, o)["hits"] for o in OUTCOMES}
             block["per_task"][task] = entry
 
         # Preregistered comparisons. S vs G is the confirmatory one.
@@ -180,6 +196,11 @@ def analyze(rows: list[dict], plan: dict, resamples: int) -> dict:
         }.items():
             per_outcome = {}
             for outcome in OUTCOMES:
+                if not (block["arm_totals"][a][outcome]["measured"]
+                        and block["arm_totals"][b][outcome]["measured"]):
+                    # Never difference an endpoint one arm cannot measure.
+                    per_outcome[outcome] = {"unavailable": True}
+                    continue
                 diffs = [
                     (block["per_task"][t][a][outcome] - block["per_task"][t][b][outcome]) / TRIALS
                     for t in tasks
@@ -208,8 +229,15 @@ def falsification_verdict(result: dict) -> dict:
     verdicts = {}
     for model, block in result["per_model"].items():
         primary = block["comparisons"]["smallcoder_vs_generic"][PRIMARY]
+        if primary.get("unavailable"):
+            verdicts[model] = {"criterion_a_thesis_falsified": None,
+                               "criterion_b_thesis_narrows": None,
+                               "criterion_c_inconclusive": None}
+            continue
         boot, sign = primary["cluster_bootstrap"], primary["sign_test"]
         anytime = block["comparisons"]["smallcoder_vs_generic"]["verified_checkpoint"]
+        if anytime.get("unavailable"):
+            anytime = primary
         thesis_falsified = (
             boot["ci95_high"] < MIN_MEANINGFUL_EFFECT and sign["p_two_sided"] >= 0.05
         )
@@ -269,17 +297,20 @@ def render_markdown(result: dict, verdicts: dict, drift: dict) -> str:
         lines.append("| --- | --- | --- | --- |")
         for config in d["configs"]:
             t = block["arm_totals"][config]
-            lines.append(
-                f"| `{config}` | {t['verified_final']['hits']}/{t['verified_final']['n']} "
-                f"| {t['verified_checkpoint']['hits']}/{t['verified_checkpoint']['n']} "
-                f"| {t['verified_ever']['hits']}/{t['verified_ever']['n']} |"
-            )
+            cells = []
+            for outcome in OUTCOMES:
+                e = t[outcome]
+                cells.append(f"{e['hits']}/{e['n']}" if e["measured"] else "not measured")
+            lines.append(f"| `{config}` | " + " | ".join(cells) + " |")
         lines.append("")
         for label, comp in block["comparisons"].items():
             lines.append(f"**{label.replace('_', ' ')}**")
             lines.append("")
             for outcome in OUTCOMES:
                 c = comp[outcome]
+                if c.get("unavailable"):
+                    lines.append(f"- `{outcome}`: **not measured for one arm — not compared**")
+                    continue
                 b, s = c["cluster_bootstrap"], c["sign_test"]
                 lines.append(
                     f"- `{outcome}`: task-cluster bootstrap = {b['point_estimate']:+.3f} "

@@ -56,6 +56,24 @@ NUMERIC_METRICS = (
     "file_not_found_errors",
     "path_suggestions_emitted",
     "path_suggestions_followed",
+    # Generic-loop control study. Absent from earlier sweeps, which is why
+    # summarize() means over rows that carry a key rather than defaulting to 0:
+    # a written zero would read as a measured zero.
+    "claimed_success",
+    "verified_final",
+    "verified_checkpoint",
+    "verified_ever",
+    "overclaim",
+    "silent_success",
+    "delivered_success",
+    "tampered",
+    "commands_run",
+    "edits_ok",
+    "edits_failed",
+    "peak_context_chars",
+    "chars_sent_total",
+    "n_messages_final",
+    "model_latency_ms_total",
 )
 
 

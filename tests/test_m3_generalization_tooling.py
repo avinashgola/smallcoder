@@ -6,6 +6,7 @@ Everything here runs on synthetic data — no model, no network.
 import json
 from pathlib import Path
 
+import httpx
 import pytest
 
 from evals.analyze_m3_generalization import (
@@ -23,11 +24,17 @@ from evals.analyze_m3_generalization import (
 from evals.run_m3_generalization import (
     ARMS,
     MODELS,
+    ROOT,
+    _endpoint_secrets,
     build_plan,
     completed_keys,
+    load_plan,
+    load_rows,
     load_task_ids,
     plan_fingerprint,
+    run_sweep,
     sanitize_row,
+    write_environment_meta,
 )
 
 TASK_IDS = load_task_ids()
@@ -291,17 +298,6 @@ def test_analyze_reports_ambiguous_tasks_separately(tmp_path):
 # rather than stop it: a half-written row, an edited frozen plan, a failed
 # metadata probe erasing unrecoverable provenance, and a resume from the wrong
 # working directory splitting rows from their trajectories.
-
-import httpx
-
-from evals.run_m3_generalization import (
-    ROOT,
-    _endpoint_secrets,
-    load_plan,
-    load_rows,
-    run_sweep,
-    write_environment_meta,
-)
 
 
 class _Settings:

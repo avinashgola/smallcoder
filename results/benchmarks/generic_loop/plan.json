@@ -1,0 +1,2911 @@
+{
+ "study": "generic-loop-control",
+ "schedule_seed": 20260908,
+ "models": [
+  "llama3.1:latest",
+  "qwen2.5-coder:7b"
+ ],
+ "trials": 5,
+ "arms": {
+  "S": "smallcoder-A",
+  "G": "generic",
+  "GC": "generic+completion"
+ },
+ "tasks": [
+  "amounts",
+  "backoff",
+  "booking",
+  "grading",
+  "invoices",
+  "leaderboard",
+  "ledger",
+  "notify",
+  "receipt",
+  "salesagg",
+  "semver",
+  "standings"
+ ],
+ "entries": [
+  {
+   "schedule_index": 0,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 1,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 2,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 3,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 4,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 5,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 6,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 7,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 8,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 9,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 10,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 11,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 12,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 13,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 14,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 15,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 16,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 17,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 18,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 19,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 20,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 21,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 22,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 23,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 24,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 25,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 26,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 27,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 28,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 29,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 30,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 31,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 32,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 33,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 34,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 35,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 36,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 37,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 38,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 39,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 40,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 41,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 42,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 43,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 44,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 45,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 46,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 47,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 48,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 49,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 50,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 51,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 52,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 53,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 54,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 55,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 56,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 57,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 58,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 59,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 60,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 61,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 62,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 63,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 64,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 65,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 66,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 67,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 68,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 69,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 70,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 71,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 72,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 73,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 74,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 75,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 76,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 77,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 78,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 79,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 80,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 81,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 82,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 83,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 84,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 85,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 86,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 87,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 88,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 89,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 90,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 91,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 92,
+   "model": "llama3.1:latest",
+   "task": "salesagg",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 93,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 94,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 95,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 96,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 97,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 98,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 99,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 100,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 101,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 102,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 103,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 104,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 105,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 106,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 107,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 108,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 109,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 110,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 111,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 112,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 113,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 114,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 115,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 116,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 117,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 118,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 119,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 120,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 121,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 122,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 123,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 124,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 125,
+   "model": "llama3.1:latest",
+   "task": "notify",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 126,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 127,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 128,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 129,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 130,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 131,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 132,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 133,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 134,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 135,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 136,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 137,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 138,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 139,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 140,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 141,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 142,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 143,
+   "model": "llama3.1:latest",
+   "task": "ledger",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 144,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 145,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 146,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 147,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 148,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 149,
+   "model": "llama3.1:latest",
+   "task": "amounts",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 150,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 151,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 152,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 153,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 154,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 155,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 156,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 157,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 158,
+   "model": "llama3.1:latest",
+   "task": "leaderboard",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 159,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 160,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 161,
+   "model": "llama3.1:latest",
+   "task": "receipt",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 162,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 163,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 164,
+   "model": "llama3.1:latest",
+   "task": "standings",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 165,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 166,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 167,
+   "model": "llama3.1:latest",
+   "task": "backoff",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 168,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 169,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 170,
+   "model": "llama3.1:latest",
+   "task": "invoices",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 171,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 172,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 173,
+   "model": "llama3.1:latest",
+   "task": "booking",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 174,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 175,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 176,
+   "model": "llama3.1:latest",
+   "task": "semver",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 177,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 178,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 179,
+   "model": "llama3.1:latest",
+   "task": "grading",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 180,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 181,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 182,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 183,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 184,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 185,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 186,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 187,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 188,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 189,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 190,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 191,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 192,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 193,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 194,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 195,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 196,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 197,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 198,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 199,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 200,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 201,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 202,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 203,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 204,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 205,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 206,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 207,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 208,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 209,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 210,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 211,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 212,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 213,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 214,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 215,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 216,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 217,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 218,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 219,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 220,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 221,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 222,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 223,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 224,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 225,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 226,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 227,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 228,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 229,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 230,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 231,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 232,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 233,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 234,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 235,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 236,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 237,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 238,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 239,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 240,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 241,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 242,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 243,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 244,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 245,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 246,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 247,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 248,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 249,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 250,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 251,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 252,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 253,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 254,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 255,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 256,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 257,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 258,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 259,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 260,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 261,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 262,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 263,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 264,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 265,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 266,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 267,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 268,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 269,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 270,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 271,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 272,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 273,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 274,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 275,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 276,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 277,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 278,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 279,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 280,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 281,
+   "model": "qwen2.5-coder:7b",
+   "task": "ledger",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 282,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 283,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 284,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 285,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 286,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 287,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 288,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 289,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 290,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 291,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 292,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 293,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 294,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 295,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 296,
+   "model": "qwen2.5-coder:7b",
+   "task": "standings",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 297,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 298,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 299,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 300,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 301,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 302,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 303,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 4,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 304,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 4,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 305,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 4,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 306,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 307,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 308,
+   "model": "qwen2.5-coder:7b",
+   "task": "salesagg",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 309,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 310,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 311,
+   "model": "qwen2.5-coder:7b",
+   "task": "invoices",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 312,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 313,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 314,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 315,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 316,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 317,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 318,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 319,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 320,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 321,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 322,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 323,
+   "model": "qwen2.5-coder:7b",
+   "task": "grading",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 324,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 325,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 326,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 327,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 328,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 329,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 330,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 3,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 331,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 3,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 332,
+   "model": "qwen2.5-coder:7b",
+   "task": "amounts",
+   "trial": 3,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 333,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 334,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 335,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 336,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 337,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 338,
+   "model": "qwen2.5-coder:7b",
+   "task": "receipt",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 339,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 340,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 341,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 342,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 343,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 344,
+   "model": "qwen2.5-coder:7b",
+   "task": "notify",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 345,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 346,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 347,
+   "model": "qwen2.5-coder:7b",
+   "task": "backoff",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 348,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 349,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 350,
+   "model": "qwen2.5-coder:7b",
+   "task": "semver",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 351,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 5,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 352,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 5,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 353,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 5,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 354,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 2,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 355,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 2,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 356,
+   "model": "qwen2.5-coder:7b",
+   "task": "booking",
+   "trial": 2,
+   "arm": "G",
+   "config": "generic"
+  },
+  {
+   "schedule_index": 357,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 1,
+   "arm": "S",
+   "config": "smallcoder-A"
+  },
+  {
+   "schedule_index": 358,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 1,
+   "arm": "GC",
+   "config": "generic+completion"
+  },
+  {
+   "schedule_index": 359,
+   "model": "qwen2.5-coder:7b",
+   "task": "leaderboard",
+   "trial": 1,
+   "arm": "G",
+   "config": "generic"
+  }
+ ],
+ "fingerprint": "0f76e14da21a9176ab8068ed3b00477a3088bca7ac927df42e8fcb4f0a08da93"
+}

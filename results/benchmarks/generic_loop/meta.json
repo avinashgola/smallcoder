@@ -1,0 +1,14 @@
+{
+  "m3_environment_match": true,
+  "models": {
+    "llama3.1:latest": "46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e",
+    "qwen2.5-coder:7b": "dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364"
+  },
+  "ollama_version": "0.21.0",
+  "prompt_sha256": {
+    "generic": "fa8a934c93a2e980843e37e0834e96ad359cc306b05e6111dc214f257e691e90",
+    "smallcoder": "97a91e613bbe8fe0593fee9e76f91927fc9a9fb67ce46f2f946f9ca900524c85"
+  },
+  "python": "3.12.10",
+  "runs_dir": "results/runs"
+}

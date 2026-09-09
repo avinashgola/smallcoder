@@ -1,0 +1,28 @@
+{
+  "id": "boltons_1e61524",
+  "category": "real bug in boltons (fix merged 2026-07-17, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_1e61524",
+  "issue": "The test suite fails: tests/test_strutils.py::test_singularize_double_s. A failing check reports: AssertionError: assert 'glas' == 'glass'",
+  "ground_truth_files": [
+    "boltons/strutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/strutils.py",
+      "old": "        singular = word[:-2]\n",
+      "new": "        singular = word[:-2]\n    elif word.endswith('ss'):\n        # Words ending in a double 's' (glass, boss, kiss) are already\n        # singular; their plurals end in 'sses' and are handled above. Do\n        # not blindly strip the trailing 's', which would produce 'glas',\n        # 'bos', 'kis' and break idempotency (singularize('Glasses') ==\n        # 'Glass', but 'Glass' must stay 'Glass').\n        return orig_word\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "1e61524a798ea73632029a013a7686036d5c126f",
+    "fix_date": "2026-07-17",
+    "fix_subject": "fix(strutils): stop singularize() mangling words ending in 'ss'",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 788530,
+    "fixture_py_files": 64
+  }
+}

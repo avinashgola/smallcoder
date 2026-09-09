@@ -1,0 +1,33 @@
+{
+  "id": "pythontabulate_5373ebf",
+  "category": "real bug in python-tabulate (fix merged 2026-03-05, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/pythontabulate_5373ebf",
+  "issue": "The test suite fails: test/test_output.py::test_floatfmt_decimal. A failing check reports: AssertionError",
+  "ground_truth_files": [
+    "tabulate/__init__.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "tabulate/__init__.py",
+      "old": "from collections.abc import Iterable, Sized\n",
+      "new": "from collections.abc import Iterable, Sized\nfrom decimal import Decimal\n"
+    },
+    {
+      "path": "tabulate/__init__.py",
+      "old": "                val = val.replace(\",\", \"\")  # handle thousands-separators\n",
+      "new": "                val = val.replace(\",\", \"\")  # handle thousands-separators\n            if isinstance(val, Decimal):\n                return format(val, floatfmt)\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "python-tabulate",
+    "fix_commit": "5373ebfa9568db65cf6b9a4edfe22662d028ef12",
+    "fix_date": "2026-03-05",
+    "fix_subject": "fix #176 - implement Decimal fixed-point support",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 307204,
+    "fixture_py_files": 12
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "id": "pythontabulate_3aa568c",
+  "category": "real bug in python-tabulate (fix merged 2026-03-05, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/pythontabulate_3aa568c",
+  "issue": "The test suite fails: test/test_output.py::test_asciidoc, test/test_output.py::test_asciidoc_headerless, test/test_regression.py::test_asciidoc_without_trailing_whitespace. A failing check reports: AssertionError",
+  "ground_truth_files": [
+    "tabulate/__init__.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "tabulate/__init__.py",
+      "old": "        return \"[{}]\\n|====\".format(\",\".join(header_list))\n",
+      "new": "        line = \"[{}]\\n|====\".format(\",\".join(header_list))\n        return line.rstrip()\n"
+    },
+    {
+      "path": "tabulate/__init__.py",
+      "old": "        return make_header_line(False, *args)\n",
+      "new": "        line = make_header_line(False, *args)\n        return line.rstrip()\n"
+    },
+    {
+      "path": "tabulate/__init__.py",
+      "old": "            return make_header_line(True, colwidths, colaligns) + \"\\n\" + data_line\n",
+      "new": "            line = make_header_line(True, colwidths, colaligns) + \"\\n\" + data_line\n            return line.rstrip()\n"
+    },
+    {
+      "path": "tabulate/__init__.py",
+      "old": "            return data_line\n",
+      "new": "            return data_line.rstrip()\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "python-tabulate",
+    "fix_commit": "3aa568c66987dbc97c079c6a2e4bd0ad362a949f",
+    "fix_date": "2026-03-05",
+    "fix_subject": "fix #408 - remove trailing whitespace from asciidoc output",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 310560,
+    "fixture_py_files": 12
+  }
+}

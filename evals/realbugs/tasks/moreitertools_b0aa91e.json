@@ -1,0 +1,28 @@
+{
+  "id": "moreitertools_b0aa91e",
+  "category": "real bug in more-itertools (fix merged 2025-12-30, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/moreitertools_b0aa91e",
+  "issue": "The test suite fails: tests/test_recipes.py::RandomProductTests::test_list_with_repeat. A failing check reports: IndexError: Cannot choose from an empty sequence",
+  "ground_truth_files": [
+    "more_itertools/recipes.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "more_itertools/recipes.py",
+      "old": "    pools = tuple(map(tuple, iterables * repeat))\n",
+      "new": "    pools = tuple(map(tuple, iterables)) * repeat\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "more-itertools",
+    "fix_commit": "b0aa91efbb452eeb8ffa0447047519c6e84d5292",
+    "fix_date": "2025-12-30",
+    "fix_subject": "Fix random_product() as well",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 487051,
+    "fixture_py_files": 7
+  }
+}

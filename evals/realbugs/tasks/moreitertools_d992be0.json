@@ -1,0 +1,43 @@
+{
+  "id": "moreitertools_d992be0",
+  "category": "real bug in more-itertools (fix merged 2026-07-12, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/moreitertools_d992be0",
+  "issue": "The test suite fails: tests/test_more.py::TestRunningMax::test_stability, tests/test_more.py::TestRunningMin::test_stability. A failing check reports: AssertionError: Lists differ: [<class 'int'>, <class 'float'>, <class 'fractions.Fraction'>] != [<class 'int'>, <class 'int'>, <class 'float'>]",
+  "ground_truth_files": [
+    "more_itertools/recipes.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "more_itertools/recipes.py",
+      "old": "    sis = deque()  # Strictly increasing subsequence\n",
+      "new": "    # Monotonically increasing subsequence of potential minimums,\n    # ordered by arrival time, with the window minimum at s[0]\n    # and the newest value at s[-1].\n    s = deque()\n\n"
+    },
+    {
+      "path": "more_itertools/recipes.py",
+      "old": "        if sis and sis[0][0] == index - maxlen:\n            sis.popleft()\n        while sis and not sis[-1][1] < value:  # Remove non-increasing values\n            sis.pop()\n        sis.append((index, value))  # Most recent value at position -1\n        yield sis[0][1]  # Window minimum at position 0\n",
+      "new": "        # Has the current minimum aged out?\n        if s and s[0][0] == index - maxlen:\n            s.popleft()\n\n        # Remove decreasing values\n        while s and not s[-1][1] <= value:\n            s.pop()\n\n        # Place newest value at the end\n        s.append((index, value))\n\n        # Current minimum is at position zero\n        yield s[0][1]\n"
+    },
+    {
+      "path": "more_itertools/recipes.py",
+      "old": "    sds = deque()  # Strictly decreasing subsequence\n",
+      "new": "    # Monotonically decreasing subsequence of potential maximums,\n    # ordered by arrival time, with the window maximum at s[0]\n    # and the newest value at s[-1].\n    s = deque()\n\n"
+    },
+    {
+      "path": "more_itertools/recipes.py",
+      "old": "        if sds and sds[0][0] == index - maxlen:\n            sds.popleft()\n        while sds and not sds[-1][1] > value:  # Remove non-decreasing values\n            sds.pop()\n        sds.append((index, value))  # Most recent value at position -1\n        yield sds[0][1]  # Window maximum at position 0\n",
+      "new": "        # Has the current maximum aged out?\n        if s and s[0][0] == index - maxlen:\n            s.popleft()\n\n        # Remove increasing values\n        while s and not s[-1][1] >= value:\n            s.pop()\n\n        # Place newest value at the end\n        s.append((index, value))\n\n        # Current maximum is at position zero\n        yield s[0][1]\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "more-itertools",
+    "fix_commit": "d992be0de9383ddcaae3a24866a2d96b52132b07",
+    "fix_date": "2026-07-12",
+    "fix_subject": "Fix stability in running_min and running_max",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 514468,
+    "fixture_py_files": 7
+  }
+}

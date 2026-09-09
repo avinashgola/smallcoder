@@ -1,0 +1,43 @@
+{
+  "id": "moreitertools_06f3181",
+  "category": "real bug in more-itertools (fix merged 2026-01-02, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/moreitertools_06f3181",
+  "issue": "The test suite fails: tests/test_more.py::NthCombinationWithReplacementTests::test_basic, tests/test_more.py::NthCombinationWithReplacementTests::test_invalid_index. A failing check reports: ValueError",
+  "ground_truth_files": [
+    "more_itertools/more.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "more_itertools/more.py",
+      "old": "    ``ValueError`` will be raised If *r* is negative or greater than the length\n    of *iterable*.\n",
+      "new": "    ``ValueError`` will be raised If *r* is negative.\n"
+    },
+    {
+      "path": "more_itertools/more.py",
+      "old": "    if (r < 0) or (r > n):\n",
+      "new": "    if r < 0:\n"
+    },
+    {
+      "path": "more_itertools/more.py",
+      "old": "\n    c = comb(n + r - 1, r)\n",
+      "new": "    c = comb(n + r - 1, r) if n else 0 if r else 1\n"
+    },
+    {
+      "path": "more_itertools/more.py",
+      "old": "\n    if (index < 0) or (index >= c):\n",
+      "new": "    if not 0 <= index < c:\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "more-itertools",
+    "fix_commit": "06f31819121eb0620d3165fda73a44cbf71b140d",
+    "fix_date": "2026-01-02",
+    "fix_subject": "Simplify nth_combination_with_replacement. Fix incorrect exception.",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 486880,
+    "fixture_py_files": 7
+  }
+}

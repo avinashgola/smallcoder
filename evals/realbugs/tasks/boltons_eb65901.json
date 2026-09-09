@@ -1,0 +1,43 @@
+{
+  "id": "boltons_eb65901",
+  "category": "real bug in boltons (fix merged 2026-08-06, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_eb65901",
+  "issue": "The test suite fails: tests/test_tableutils.py::test_to_text_empty_table, tests/test_tableutils.py::test_to_text_no_headers, tests/test_tableutils.py::test_to_text_none_headers, tests/test_tableutils.py::test_to_text_short_headers_padded. A failing check reports: ValueError: max() iterable argument is empty",
+  "ground_truth_files": [
+    "boltons/tableutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/tableutils.py",
+      "old": "        self._width = max([len(d) for d in self._data])\n",
+      "new": "        self._width = max([len(d) for d in self._data], default=0)\n"
+    },
+    {
+      "path": "boltons/tableutils.py",
+      "old": "        headers = list(self.headers)\n",
+      "new": "        headers = list(self.headers)\n        if with_headers and headers:\n            headers.extend([None] * (self._width - len(headers)))\n        else:\n            headers = []\n        text_headers = [to_text(h, maxlen=maxlen) for h in headers]\n"
+    },
+    {
+      "path": "boltons/tableutils.py",
+      "old": "            if with_headers:\n                cur_widths.append(len(to_text(headers[idx], maxlen=maxlen)))\n            widths.append(max(cur_widths))\n        if with_headers:\n",
+      "new": "            if text_headers:\n                cur_widths.append(len(text_headers[idx]))\n            widths.append(max(cur_widths, default=0))\n        if text_headers:\n"
+    },
+    {
+      "path": "boltons/tableutils.py",
+      "old": "                                     for i, h in enumerate(headers)]))\n",
+      "new": "                                     for i, h in enumerate(text_headers)]))\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "eb659013fbe4f355561fbead2116868366ba6e26",
+    "fix_date": "2026-08-06",
+    "fix_subject": "tableutils: fix Table.to_text crashes on degenerate tables and headers",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 795038,
+    "fixture_py_files": 65
+  }
+}

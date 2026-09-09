@@ -1,0 +1,28 @@
+{
+  "id": "pythontabulate_d29909b",
+  "category": "real bug in python-tabulate (fix merged 2025-03-17, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/pythontabulate_d29909b",
+  "issue": "The test suite fails: test/test_textwrapper.py::test_wrap_optional_bool_strs. A failing check reports: AttributeError: 'bool' object has no attribute 'splitlines'",
+  "ground_truth_files": [
+    "tabulate/__init__.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "tabulate/__init__.py",
+      "old": "                # Cast based on our internal type handling. Any future custom\n                # formatting of types (such as datetimes) may need to be more\n                # explicit than just `str` of the object. Also doesn't work for\n                # custom floatfmt/intfmt, nor with any missing/blank cells.\n                casted_cell = (\n                    str(cell) if _isnumber(cell) else _type(cell, numparse)(cell)\n                )\n",
+      "new": "                casted_cell = str(cell)\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "python-tabulate",
+    "fix_commit": "d29909b4fb17e2bbf62dde8bc730e9f29240155f",
+    "fix_date": "2025-03-17",
+    "fix_subject": "Fix handling \"True\"/\"False\" bool str and None",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 289775,
+    "fixture_py_files": 11
+  }
+}

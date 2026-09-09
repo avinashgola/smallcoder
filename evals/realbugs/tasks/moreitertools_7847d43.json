@@ -1,0 +1,33 @@
+{
+  "id": "moreitertools_7847d43",
+  "category": "real bug in more-itertools (fix merged 2026-09-03, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/moreitertools_7847d43",
+  "issue": "The test suite fails: tests/test_more.py::ValueChainTests::test_type_error_while_iterating. A failing check reports: AssertionError: TypeError not raised",
+  "ground_truth_files": [
+    "more_itertools/more.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "more_itertools/more.py",
+      "old": "            yield from value\n",
+      "new": "            it = iter(value)\n"
+    },
+    {
+      "path": "more_itertools/more.py",
+      "old": "        except TypeError:\n            yield value\n",
+      "new": "        except TypeError:\n            yield value\n        else:\n            yield from it\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "more-itertools",
+    "fix_commit": "7847d4324a581da8d0919734a8e50b2a6573b780",
+    "fix_date": "2026-09-03",
+    "fix_subject": "Don't mask TypeError raised while iterating in value_chain",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 522275,
+    "fixture_py_files": 7
+  }
+}

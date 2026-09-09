@@ -1,0 +1,33 @@
+{
+  "id": "moreitertools_edb3346",
+  "category": "real bug in more-itertools (fix merged 2026-04-10, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/moreitertools_edb3346",
+  "issue": "The test suite fails: tests/test_more.py::NumericRangeTests::test_empty_reversed. A failing check reports: IndexError: numeric range object index out of range",
+  "ground_truth_files": [
+    "more_itertools/more.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "more_itertools/more.py",
+      "old": "    def __reversed__(self):\n",
+      "new": "    def __reversed__(self):\n        # Empty iterator\n        try:\n            start = self._get_by_index(-1)\n        except IndexError:\n            return iter([])\n\n"
+    },
+    {
+      "path": "more_itertools/more.py",
+      "old": "            numeric_range(\n                self._get_by_index(-1), self._start - self._step, -self._step\n            )\n",
+      "new": "            numeric_range(start, self._start - self._step, -self._step)\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "more-itertools",
+    "fix_commit": "edb3346f835ca917efbfda5e2d6664ab952da369",
+    "fix_date": "2026-04-10",
+    "fix_subject": "Fix empty ranges in numeric_range.__reversed__",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 504991,
+    "fixture_py_files": 7
+  }
+}

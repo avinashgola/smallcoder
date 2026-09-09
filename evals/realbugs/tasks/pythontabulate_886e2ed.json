@@ -1,0 +1,28 @@
+{
+  "id": "pythontabulate_886e2ed",
+  "category": "real bug in python-tabulate (fix merged 2026-03-04, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/pythontabulate_886e2ed",
+  "issue": "The test suite fails: test/test_textwrapper.py::test_wrap_optional_bool_strs. A failing check reports: AttributeError: 'bool' object has no attribute 'splitlines'",
+  "ground_truth_files": [
+    "tabulate/__init__.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "tabulate/__init__.py",
+      "old": "                    missingval if cell is None else str(cell) if cell == '' or _isnumber(cell) else _type(cell, numparse)(cell)\n",
+      "new": "                    missingval if cell is None else str(cell) if cell == '' or _isnumber(cell) else str(_type(cell, numparse)(cell))\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "python-tabulate",
+    "fix_commit": "886e2ed87b499e8485882da0ea5f5b122ca1d55a",
+    "fix_date": "2026-03-04",
+    "fix_subject": "fix conflicting wrapping behavior for missing (None) values",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 294866,
+    "fixture_py_files": 11
+  }
+}

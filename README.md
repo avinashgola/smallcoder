@@ -221,6 +221,24 @@ No host, model, or credential is hard-coded. Never commit `.env`.
   the M2B freeze (held out for M2B; reused as M3's evaluation/design set).
 - `evals/m3_generalization/` — 12 tasks frozen and committed before any model
   run, for the preregistered independent M3 generalization study.
+- `evals/ladder/` — 24 authored multi-file tasks in two size bands (12.7–20.8KB
+  and 46–64KB) that make repository size an independent variable; not yet run
+  against any model.
+- `evals/quixbugs/` — 24 tasks imported from QuixBugs (MIT) by
+  `evals/import_quixbugs.py`. Public since 2017, so **assume contaminated**:
+  valid for arm-vs-arm comparisons only, never as an absolute capability
+  number.
+- `evals/realbugs/` — real repositories snapshotted just before a real bug fix,
+  mined by `evals/mine_realbugs.py`. Every fix was merged after 2025-01-01 —
+  past the study models' training cutoffs — so the patches cannot be memorized.
+  Fixtures run 290KB–825KB across 7–65 files; provenance (repo, commit, date)
+  is recorded per task. Not yet run against any model.
+- [`BENCHMARK.md`](BENCHMARK.md) — the generated manifest of every suite:
+  counts, sizes, provenance, **contamination status** and licensing, kept
+  honest by `python -m evals.benchmark_manifest --check` in CI.
+- `evals/check_reproducibility.py` — CI gate proving every published analysis
+  reproduces **byte-identically** from the tracked rows against golden copies
+  under `results/analysis/golden/`.
 - `evals/run_m3_generalization.py` — resume-safe scheduler for that study: a
   fingerprinted 240-entry plan, deterministic run order, one retry on
   infrastructure error, and endpoint scrubbing on every persisted row.

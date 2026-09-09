@@ -1,0 +1,28 @@
+{
+  "id": "moreitertools_0e6acdf",
+  "category": "real bug in more-itertools (fix merged 2026-07-19, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/moreitertools_0e6acdf",
+  "issue": "The test suite fails: tests/test_more.py::ChunkedTests::test_negative. A failing check reports: AssertionError: \"n must be at least 0\" does not match \"Stop argument for islice() must be None or an integer: 0 <= x <= sys.maxsize.\"",
+  "ground_truth_files": [
+    "more_itertools/more.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "more_itertools/more.py",
+      "old": "    list is yielded.\n\n    \"\"\"\n",
+      "new": "    list is yielded.\n\n    \"\"\"\n    if n is not None and n < 0:\n        raise ValueError('n must be at least 0')\n\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "more-itertools",
+    "fix_commit": "0e6acdf9b60765ecf9634d6f5c132ac1bebc616b",
+    "fix_date": "2026-07-19",
+    "fix_subject": "Raise a clear ValueError for negative n in chunked()",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 514650,
+    "fixture_py_files": 7
+  }
+}

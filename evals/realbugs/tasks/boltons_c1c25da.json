@@ -1,0 +1,28 @@
+{
+  "id": "boltons_c1c25da",
+  "category": "real bug in boltons (fix merged 2026-08-06, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_c1c25da",
+  "issue": "The test suite fails: tests/test_mathutils.py::test_bits_len_bound. A failing check reports: assert Bits(3, 2).as_bin() == '11'",
+  "ground_truth_files": [
+    "boltons/mathutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/mathutils.py",
+      "old": "        if val > 2 ** len_:\n",
+      "new": "        if val >= 2 ** len_:\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "c1c25da365cf14878cf5317147e7a09b5d124df5",
+    "fix_date": "2026-08-06",
+    "fix_subject": "Fix off-by-one in Bits length check",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 794404,
+    "fixture_py_files": 65
+  }
+}

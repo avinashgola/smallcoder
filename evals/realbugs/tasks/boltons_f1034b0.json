@@ -1,0 +1,38 @@
+{
+  "id": "boltons_f1034b0",
+  "category": "real bug in boltons (fix merged 2026-08-06, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_f1034b0",
+  "issue": "The test suite fails: tests/test_jsonutils.py::test_jsonl_iterator_mid_last_line_seek_terminates, tests/test_jsonutils.py::test_jsonl_iterator_rel_seek_negative. A failing check reports: RuntimeError: read() called more than 100 times, likely an infinite loop",
+  "ground_truth_files": [
+    "boltons/jsonutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/jsonutils.py",
+      "old": "            rel_seek = 1.0 - rel_seek\n",
+      "new": "            rel_seek = 1.0 + rel_seek\n"
+    },
+    {
+      "path": "boltons/jsonutils.py",
+      "old": "            cur = fo.read(bsize)\n",
+      "new": "            cur = fo.read(bsize)\n            if not cur:\n                # no newline until EOF; a partial trailing line was\n                # never yieldable from a mid-line seek anyway\n                fo.seek(0, os.SEEK_END)\n                return\n"
+    },
+    {
+      "path": "boltons/jsonutils.py",
+      "old": "        try:\n            newline_offset = cur.index('\\n') + total_read - bsize\n        except ValueError:\n            raise  # TODO: seek to end?\n",
+      "new": "        newline_offset = cur.index('\\n') + total_read - bsize\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "f1034b07ddf71f4d9285134a47a4ade16fe40789",
+    "fix_date": "2026-08-06",
+    "fix_subject": "jsonutils: fix JSONLIterator nontermination at EOF and negative rel_seek",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 801142,
+    "fixture_py_files": 65
+  }
+}

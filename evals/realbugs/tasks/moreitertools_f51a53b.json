@@ -1,0 +1,28 @@
+{
+  "id": "moreitertools_f51a53b",
+  "category": "real bug in more-itertools (fix merged 2026-06-29, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/moreitertools_f51a53b",
+  "issue": "The test suite fails: tests/test_more.py::InterleaveEvenlyTests::test_no_iterables. A failing check reports: IndexError: list index out of range",
+  "ground_truth_files": [
+    "more_itertools/more.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "more_itertools/more.py",
+      "old": "    dims = len(lengths)\n\n",
+      "new": "    dims = len(lengths)\n\n    if not dims:\n        return\n\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "more-itertools",
+    "fix_commit": "f51a53bfd2fe9504063a33ef5f4a73e30d82d0e2",
+    "fix_date": "2026-06-29",
+    "fix_subject": "fix: handle empty interleave_evenly input",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 513110,
+    "fixture_py_files": 7
+  }
+}

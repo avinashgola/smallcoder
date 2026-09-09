@@ -1,0 +1,68 @@
+{
+  "id": "boltons_99dec84",
+  "category": "real bug in boltons (fix merged 2026-08-02, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_99dec84",
+  "issue": "The test suite fails: tests/test_timeutils.py::test_us_timezone_dst_fold, tests/test_timeutils.py::test_us_timezone_fromutc_sets_fold. A failing check reports: assert datetime.timedelta(days=-1, seconds=68400) == (-4 * datetime.timedelta(seconds=3600))",
+  "ground_truth_files": [
+    "boltons/timeutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/timeutils.py",
+      "old": "# and ends at 2am (DST time; 1am standard time) on the first Sunday of Nov.\nDSTEND_2007 = datetime(1, 11, 1, 1)\n",
+      "new": "# and ends at 2am (standard time) on the first Sunday of Nov.\nDSTEND_2007 = datetime(1, 11, 1, 2)\n"
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "# Sunday in April and to end at 2am (DST time; 1am standard time) on the last\n",
+      "new": "# Sunday in April and to end at 2am (standard time) on the last\n"
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "DSTEND_1987_2006 = datetime(1, 10, 25, 1)\n",
+      "new": "DSTEND_1987_2006 = datetime(1, 10, 25, 2)\n"
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "# Sunday in April (the one on or after April 24) and to end at 2am (DST time;\n# 1am standard time) on the last Sunday of October, which is the first Sunday\n",
+      "new": "# Sunday in April (the one on or after April 24) and to end at 2am (standard\n# time) on the last Sunday of October, which is the first Sunday\n"
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "        return self.stdoffset + self.dst(dt)\n",
+      "new": "        return self.stdoffset + self.dst(dt)\n\n    def _dst_range(self, year):\n        if year > 2006:\n            dststart, dstend = DSTSTART_2007, DSTEND_2007\n        elif 1986 < year < 2007:\n            dststart, dstend = DSTSTART_1987_2006, DSTEND_1987_2006\n        elif 1966 < year < 1987:\n            dststart, dstend = DSTSTART_1967_1986, DSTEND_1967_1986\n        else:\n            return None, None\n        return (_first_sunday_on_or_after(dststart.replace(year=year)),\n                _first_sunday_on_or_after(dstend.replace(year=year)))\n"
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "        if 2006 < dt.year:\n            dststart, dstend = DSTSTART_2007, DSTEND_2007\n        elif 1986 < dt.year < 2007:\n            dststart, dstend = DSTSTART_1987_2006, DSTEND_1987_2006\n        elif 1966 < dt.year < 1987:\n            dststart, dstend = DSTSTART_1967_1986, DSTEND_1967_1986\n        else:\n",
+      "new": "        start, end = self._dst_range(dt.year)\n        if start is None:\n"
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "\n        start = _first_sunday_on_or_after(dststart.replace(year=dt.year))\n        end = _first_sunday_on_or_after(dstend.replace(year=dt.year))\n",
+      "new": ""
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "        if start <= dt.replace(tzinfo=None) < end:\n",
+      "new": "        dt = dt.replace(tzinfo=None)\n        if start + HOUR <= dt < end - HOUR:\n"
+    },
+    {
+      "path": "boltons/timeutils.py",
+      "old": "            return HOUR\n        else:\n            return ZERO\n",
+      "new": "            return HOUR\n        if end - HOUR <= dt < end:\n            return ZERO if getattr(dt, 'fold', 0) else HOUR\n        if start <= dt < start + HOUR:\n            return HOUR if getattr(dt, 'fold', 0) else ZERO\n        return ZERO\n\n    def fromutc(self, dt):\n        if dt.tzinfo is not self:\n            raise ValueError('fromutc: dt.tzinfo is not self')\n\n        start, end = self._dst_range(dt.year)\n        if start is None:\n            return dt + self.stdoffset\n\n        start = start.replace(tzinfo=self)\n        end = end.replace(tzinfo=self)\n        std_time = dt + self.stdoffset\n        dst_time = std_time + HOUR\n\n        if end <= dst_time < end + HOUR:\n            return std_time.replace(fold=1)\n        if std_time < start or dst_time >= end:\n            return std_time\n        if start <= std_time < end - HOUR:\n            return dst_time\n        return std_time\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "99dec84c99d02d8259093c0d520769b28d4d2aaf",
+    "fix_date": "2026-08-02",
+    "fix_subject": "Fix US timezone fold handling",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 794843,
+    "fixture_py_files": 65
+  }
+}

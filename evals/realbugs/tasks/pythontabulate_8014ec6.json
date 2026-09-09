@@ -1,0 +1,33 @@
+{
+  "id": "pythontabulate_8014ec6",
+  "category": "real bug in python-tabulate (fix merged 2026-03-05, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/pythontabulate_8014ec6",
+  "issue": "The test suite fails: test/test_output.py::test_github, test/test_output.py::test_github_multiline, test/test_output.py::test_github_with_colalign, test/test_output.py::test_simple_headerless_with_sep_line_with_padding_in_tablefmt. A failing check reports: AssertionError",
+  "ground_truth_files": [
+    "tabulate/__init__.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "tabulate/__init__.py",
+      "old": "    \"github\": TableFormat(\n        lineabove=Line(\"|\", \"-\", \"|\", \"|\"),\n        linebelowheader=Line(\"|\", \"-\", \"|\", \"|\"),\n        linebetweenrows=None,\n        linebelow=None,\n        headerrow=DataRow(\"|\", \"|\", \"|\"),\n        datarow=DataRow(\"|\", \"|\", \"|\"),\n        padding=1,\n        with_header_hide=[\"lineabove\"],\n    ),\n",
+      "new": ""
+    },
+    {
+      "path": "tabulate/__init__.py",
+      "old": "    ),\n}\n",
+      "new": "    ),\n}\n\n# \"github\" is an alias for \"pipe\": both produce GitHub-flavored Markdown with\n# alignment colons in the separator row.\n_table_formats[\"github\"] = _table_formats[\"pipe\"]\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "python-tabulate",
+    "fix_commit": "8014ec66820c89307005b26f878119baa5bf6932",
+    "fix_date": "2026-03-05",
+    "fix_subject": "Fix alignments in `github` tables",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 311621,
+    "fixture_py_files": 12
+  }
+}

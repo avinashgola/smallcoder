@@ -1,0 +1,33 @@
+{
+  "id": "boltons_ec1ff9f",
+  "category": "real bug in boltons (fix merged 2026-08-07, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_ec1ff9f",
+  "issue": "The test suite fails: tests/test_setutils.py::test_complement_set. A failing check reports: assert complement(complement(set())) == set()",
+  "ground_truth_files": [
+    "boltons/setutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/setutils.py",
+      "old": "                return self._excluded.issupserset(exc)\n",
+      "new": "                return self._excluded.issuperset(exc)\n"
+    },
+    {
+      "path": "boltons/setutils.py",
+      "old": "                return self._included.issupserset(inc)\n",
+      "new": "                return self._included.issuperset(inc)\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "ec1ff9f6728f5f857402b294c218be731c62af5f",
+    "fix_date": "2026-08-07",
+    "fix_subject": "Fix issupserset typo in _ComplementSet comparisons (#438)",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 805447,
+    "fixture_py_files": 65
+  }
+}

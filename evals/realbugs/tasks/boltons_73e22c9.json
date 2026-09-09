@@ -1,0 +1,33 @@
+{
+  "id": "boltons_73e22c9",
+  "category": "real bug in boltons (fix merged 2026-09-07, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_73e22c9",
+  "issue": "The test suite fails: tests/test_statsutils.py::test_pearson_type_zero_denominator. A failing check reports: AttributeError: 'Stats' object has no attribute '_pearson_type'. Did you mean: 'pearson_type'?",
+  "ground_truth_files": [
+    "boltons/statsutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/statsutils.py",
+      "old": "            return 3  # Gamma\n        else:\n",
+      "new": "            return 3  # Gamma\n        else:\n            if c0 == 0:\n                # At exact zero, c2's sign selects the limiting Type I/VI.\n                return 1 if c2 < 0 else 6\n"
+    },
+    {
+      "path": "boltons/statsutils.py",
+      "old": "                return 1  # Beta\n",
+      "new": "                return 1  # Beta\n            # The existing precision also widens the Type V boundary.\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "73e22c90de25aaae3e6aed57f7438ffe57349339",
+    "fix_date": "2026-09-07",
+    "fix_subject": "statsutils: finish Pearson zero-denominator review and regression coverage",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 825222,
+    "fixture_py_files": 65
+  }
+}

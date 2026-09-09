@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SUITES = {
     "ladder": ROOT / "evals" / "ladder" / "tasks",
     "quixbugs": ROOT / "evals" / "quixbugs" / "tasks",
+    "realbugs": ROOT / "evals" / "realbugs" / "tasks",
 }
 ALL_TASK_DIRS = [
     ROOT / "evals" / "tasks",
@@ -34,9 +35,20 @@ ALL_TASK_DIRS = [
     *SUITES.values(),
 ]
 REQUIRED_FIELDS = (
-    "id", "category", "fixture", "issue",
-    "ground_truth_files", "reference_fix", "max_steps",
+    "id", "category", "fixture", "issue", "ground_truth_files", "max_steps",
 )
+
+
+def edits_of(spec: dict) -> list[dict]:
+    """A task declares either one reference_fix or a list of reference_edits.
+
+    The realbugs suite mines real commits, whose fixes are often several hunks;
+    each hunk is still held to the exact-unique-anchor contract, applied in
+    order.
+    """
+    if "reference_edits" in spec:
+        return spec["reference_edits"]
+    return [spec["reference_fix"]]
 
 
 def specs_in(task_dir: Path):
@@ -96,13 +108,19 @@ def test_required_fields_and_referenced_paths(key):
     fixture = ROOT / spec["fixture"]
     assert fixture.is_dir(), f"{key}: fixture dir missing"
     assert (fixture / "conftest.py").is_file(), f"{key}: no root conftest"
-    assert list((fixture / "tests").glob("test_*.py")), f"{key}: no tests"
+    # Real repositories name their test dir freely (tests/, test/, ...); the
+    # verifier just runs pytest from the root, so require only that test files
+    # exist somewhere in the snapshot.
+    assert any(f.name.startswith("test_") and f.suffix == ".py"
+               for f in fixture.rglob("*.py")), f"{key}: no tests"
     assert spec["ground_truth_files"], f"{key}: empty ground_truth_files"
     for rel in spec["ground_truth_files"]:
         assert (fixture / rel).is_file(), f"{key}: missing ground-truth file {rel}"
-    fix = spec["reference_fix"]
-    assert (fixture / fix["path"]).is_file(), f"{key}: missing fix target"
-    assert fix["old"] != fix["new"], f"{key}: reference fix is a no-op"
+    assert ("reference_fix" in spec) != ("reference_edits" in spec), (
+        f"{key}: declare exactly one of reference_fix / reference_edits")
+    for fix in edits_of(spec):
+        assert (fixture / fix["path"]).is_file(), f"{key}: missing fix target {fix['path']}"
+        assert fix["old"] != fix["new"], f"{key}: a reference edit is a no-op"
     assert isinstance(spec["max_steps"], int) and spec["max_steps"] > 0
     assert not list(fixture.rglob("__pycache__")), f"{key}: fixture contains __pycache__"
     assert not (fixture / ".git").exists(), f"{key}: fixture contains a .git dir"
@@ -110,10 +128,39 @@ def test_required_fields_and_referenced_paths(key):
 
 @pytest.mark.parametrize("key", NEW_IDS)
 def test_reference_old_text_matches_exactly_once(key):
+    """First edit per file must anchor in the committed file; later edits to the
+    same file are checked at application time, since earlier edits change it."""
     spec = spec_for(key)
-    target = ROOT / spec["fixture"] / spec["reference_fix"]["path"]
-    count = target.read_text().count(spec["reference_fix"]["old"])
-    assert count == 1, f"{key}: reference old text matched {count} times, need exactly 1"
+    checked: set[str] = set()
+    for fix in edits_of(spec):
+        if fix["path"] in checked:
+            continue
+        checked.add(fix["path"])
+        count = (ROOT / spec["fixture"] / fix["path"]).read_text().count(fix["old"])
+        assert count == 1, f"{key}:{fix['path']}: anchor matched {count} times, need exactly 1"
+
+
+def test_realbugs_issues_do_not_name_the_ground_truth_module():
+    """Failing test ids are allowed — a real engineer sees them — but the issue
+    must never hand over the source module the fix belongs in."""
+    for spec in specs_in(SUITES["realbugs"]):
+        stems = {Path(f).stem for f in spec["ground_truth_files"]}
+        for stem in stems:
+            assert stem not in spec["issue"].replace("test_" + stem, ""), (
+                f"{spec['id']}: issue names ground-truth module {stem!r}")
+
+
+def test_realbugs_provenance_is_recorded_and_post_cutoff():
+    for spec in specs_in(SUITES["realbugs"]):
+        prov = spec.get("provenance") or {}
+        for field in ("repo", "fix_commit", "fix_date", "fix_subject"):
+            assert prov.get(field), f"{spec['id']}: missing provenance field {field}"
+        assert prov["fix_date"] >= "2025-01-01", (
+            f"{spec['id']}: fix predates the models' training cutoffs")
+        fixture = ROOT / spec["fixture"]
+        licences = [f for f in fixture.iterdir() if f.is_file()
+                    and f.name.upper().startswith(("LICENSE", "NOTICE", "COPYING"))]
+        assert licences, f"{spec['id']}: snapshot lost its upstream licence file"
 
 
 def test_ladder_issues_do_not_give_away_the_location():
@@ -163,11 +210,12 @@ def test_baseline_fails_and_reference_fix_passes(key, tmp_path):
         f"{baseline.stdout[-1500:]}"
     )
 
-    target = workdir / spec["reference_fix"]["path"]
-    text = target.read_text()
-    old, new = spec["reference_fix"]["old"], spec["reference_fix"]["new"]
-    assert text.count(old) == 1
-    target.write_text(text.replace(old, new))
+    for fix in edits_of(spec):
+        target = workdir / fix["path"]
+        text = target.read_text()
+        assert text.count(fix["old"]) == 1, (
+            f"{key}:{fix['path']}: anchor not unique at application time")
+        target.write_text(text.replace(fix["old"], fix["new"]))
 
     fixed = run_fixture_pytest(workdir)
     assert fixed.returncode == 0, (

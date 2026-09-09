@@ -1,0 +1,28 @@
+{
+  "id": "boltons_ead236e",
+  "category": "real bug in boltons (fix merged 2026-07-17, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/boltons_ead236e",
+  "issue": "The test suite fails: tests/test_iterutils.py::test_backoff_constant_factor. A failing check reports: assert backoff(1, 10, count=5, factor=1.0) == [1.0, 1.0, 1.0, 1.0, 1.0]",
+  "ground_truth_files": [
+    "boltons/iterutils.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "boltons/iterutils.py",
+      "old": "        count = 1 + math.ceil(math.log(stop/denom, factor))\n        count = count if start else count + 1\n",
+      "new": "        if factor == 1.0:\n            if start != stop:\n                raise ValueError('expected factor > 1.0 when count is None'\n                                 ' and start != stop, not %r' % factor)\n            count = 1\n        else:\n            count = 1 + math.ceil(math.log(stop/denom, factor))\n            count = count if start else count + 1\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "boltons",
+    "fix_commit": "ead236e278ca0466bf468de746b5960fb12d7e5b",
+    "fix_date": "2026-07-17",
+    "fix_subject": "fix: backoff_iter with factor=1.0 and no count raised ZeroDivisionError",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 789567,
+    "fixture_py_files": 64
+  }
+}

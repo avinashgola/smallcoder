@@ -1,0 +1,28 @@
+{
+  "id": "pythontabulate_87a9a4e",
+  "category": "real bug in python-tabulate (fix merged 2026-03-04, post-cutoff)",
+  "fixture": "evals/realbugs/fixtures/pythontabulate_87a9a4e",
+  "issue": "The test suite fails: test/test_regression.py::test_empty_table_with_maxheadercolwidths. A failing check reports: IndexError: list index out of range",
+  "ground_truth_files": [
+    "tabulate/__init__.py"
+  ],
+  "reference_edits": [
+    {
+      "path": "tabulate/__init__.py",
+      "old": "    if maxheadercolwidths is not None:\n        num_cols = len(list_of_lists[0])\n",
+      "new": "    if maxheadercolwidths is not None:\n        num_cols = len(list_of_lists[0]) if list_of_lists else len(headers)\n"
+    }
+  ],
+  "max_steps": 30,
+  "provenance": {
+    "repo": "python-tabulate",
+    "fix_commit": "87a9a4e07a5efb39b81fdb6ac513b1d345bb21fb",
+    "fix_date": "2026-03-04",
+    "fix_subject": "fix #365 - added a regression test and a fix based on pull request #393",
+    "licence_files": [
+      "LICENSE"
+    ],
+    "fixture_py_bytes": 295785,
+    "fixture_py_files": 11
+  }
+}

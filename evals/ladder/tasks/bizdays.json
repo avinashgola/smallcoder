@@ -1,0 +1,15 @@
+{
+  "id": "bizdays",
+  "category": "off-by-one at a half-open range boundary in a shared date-walking helper; symptom surfaces two packages away",
+  "fixture": "evals/ladder/fixtures/bizdays",
+  "issue": "Every working-day count we produce is one day too high. The capacity report says March 2024 has 22 working days and July 2024 has 23; the real figures are 21 and 22. Asking how many working days lie between Monday 4 March 2024 and Friday 8 March 2024 answers 5, but only Monday through Thursday fall inside that window - the end date is meant to be excluded, not counted. Ticket due dates themselves come out correct, yet the 'business days remaining' number shown beside them is inflated by one as well.",
+  "ground_truth_files": [
+    "chrono/ranges.py"
+  ],
+  "reference_fix": {
+    "path": "chrono/ranges.py",
+    "old": "    cursor = start\n    while cursor <= end:\n",
+    "new": "    cursor = start\n    while cursor < end:\n"
+  },
+  "max_steps": 30
+}

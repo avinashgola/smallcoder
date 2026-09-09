@@ -1,0 +1,13 @@
+{
+  "id": "envvars",
+  "category": "settings loading from environment mappings (shared mutable default argument aliased instead of copied); two packages, declarative spec plus service bootstrap",
+  "fixture": "evals/ladder/fixtures/envvars",
+  "issue": "Reading settings twice in the same process gives wrong answers the second time. In a management command that reads one component's settings and then another's, the second result comes back holding values from the first read: settings that were never set in that environment appear anyway, and settings that should fall back to their declared default keep whatever the earlier read produced. Even the keys are wrong -- the second result contains names that belong to the other component entirely. We also found that the dictionary of command-line values we hand in gets extra keys written into it after the call. Each read is supposed to depend only on the environment mapping and the declarations it is given.",
+  "ground_truth_files": ["envcfg/loader.py"],
+  "reference_fix": {
+    "path": "envcfg/loader.py",
+    "old": "    values = overrides\n",
+    "new": "    values = dict(overrides)\n"
+  },
+  "max_steps": 30
+}

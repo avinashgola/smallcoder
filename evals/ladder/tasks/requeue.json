@@ -1,0 +1,16 @@
+{
+  "id": "requeue",
+  "category": "retry budget off-by-one (attempt counter semantics split across the loop and the policy); 4 packages, two-file defect",
+  "fixture": "evals/ladder/fixtures/requeue",
+  "issue": "Every task runs one time too many. A task configured for at most 3 attempts is executed 4 times and waits three times between them, and a task marked as \"do not retry\" (a budget of 1 attempt) is still executed twice. The extra execution happens even for tasks whose handler fails the same way every time, so we are hammering a dead endpoint an extra round and the recorded attempt history is one entry longer than the configured budget. Permanent failures are correctly not retried at all, so only the counting of the budget looks wrong.",
+  "ground_truth_files": [
+    "queueing/policy.py",
+    "worker/loop.py"
+  ],
+  "reference_fix": {
+    "path": "queueing/policy.py",
+    "old": "        if not self.classifier.is_retryable(error):\n            return False\n        return attempts_made <= self.max_attempts",
+    "new": "        if not self.classifier.is_retryable(error):\n            return False\n        return attempts_made < self.max_attempts"
+  },
+  "max_steps": 30
+}

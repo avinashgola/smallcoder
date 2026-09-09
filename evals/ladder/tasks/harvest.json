@@ -1,0 +1,15 @@
+{
+  "id": "harvest",
+  "category": "result collection (early return abandons the rest of the run); 4 packages, 30 files",
+  "fixture": "evals/ladder/fixtures/harvest",
+  "issue": "As soon as one stage fails, the run report stops there. Our nightly plan is configured to keep going after a failure, and the later stages really do run - their output lands where it should - but the report lists only the stages up to and including the failed one, the stages that were skipped are missing entirely, and every headline number comes out at zero: 0 rows in, 0 rows out, 0ms total, and the summary is still flagged as unfinished. The CSV and JSON exports are short by the same rows. A run in which nothing fails is reported completely and correctly.",
+  "ground_truth_files": [
+    "harvester/collector.py"
+  ],
+  "reference_fix": {
+    "path": "harvester/collector.py",
+    "old": "            if outcome.state == State.FAILED:\n                summary.add_failure(outcome)\n                return summary",
+    "new": "            if outcome.state == State.FAILED:\n                summary.add_failure(outcome)\n                continue"
+  },
+  "max_steps": 30
+}

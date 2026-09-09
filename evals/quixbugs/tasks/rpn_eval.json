@@ -1,0 +1,16 @@
+{
+  "id": "rpn_eval",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/rpn_eval",
+  "issue": "The rpn eval routine gives wrong results: calling it with [[3.0, 5.0, '+', 2.0, '/']] returns 0.25, but the answer should be 4.0.",
+  "ground_truth_files": [
+    "rpn_eval.py"
+  ],
+  "reference_fix": {
+    "path": "rpn_eval.py",
+    "old": "                op(token, a, b)\n",
+    "new": "                op(token, b, a)\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

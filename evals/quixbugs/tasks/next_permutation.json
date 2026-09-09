@@ -1,0 +1,16 @@
+{
+  "id": "next_permutation",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/next_permutation",
+  "issue": "The next permutation routine gives wrong results: calling it with [[3, 2, 4, 1]] returns [3, 1, 2, 4], but the answer should be [3, 4, 1, 2].",
+  "ground_truth_files": [
+    "next_permutation.py"
+  ],
+  "reference_fix": {
+    "path": "next_permutation.py",
+    "old": "                if perm[j] < perm[i]:\n",
+    "new": "                if perm[i] < perm[j]:\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

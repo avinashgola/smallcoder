@@ -1,0 +1,16 @@
+{
+  "id": "rowset",
+  "category": "off-by-one on an inclusive upper bound (binary search picks the wrong side of the last key); 25 files across four packages",
+  "fixture": "evals/ladder/fixtures/rowset",
+  "issue": "Range queries drop the rows that sit exactly on the top of the range, but only when the column has an index on it. Our tickets table has scores 10, 20, 30, 30: asking for the range 20 to 30 comes back with just the 20, and asking for 30 to 30 comes back empty. The same questions against a table with no index on that column return the 30s as well, which is what we expect - the range is supposed to include both ends. Asking for \"at most 30\" is correct, and so is any range whose top is a value no row happens to hold, so it looks like only the last matching value is being cut off.",
+  "ground_truth_files": [
+    "sheets/indexes/sorted_index.py",
+    "finders/planner.py"
+  ],
+  "reference_fix": {
+    "path": "sheets/indexes/sorted_index.py",
+    "old": "        start = bisect.bisect_left(self._keys, low)\n        stop = bisect.bisect_left(self._keys, high)\n",
+    "new": "        start = bisect.bisect_left(self._keys, low)\n        stop = bisect.bisect_right(self._keys, high)\n"
+  },
+  "max_steps": 30
+}

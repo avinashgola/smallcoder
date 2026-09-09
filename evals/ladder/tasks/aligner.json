@@ -1,0 +1,15 @@
+{
+  "id": "aligner",
+  "category": "operator precedence slip in a padding calculation; text table formatter across two packages",
+  "fixture": "evals/ladder/fixtures/aligner",
+  "issue": "Table headings are misplaced and the borders stop lining up. In a table whose columns come out 5 and 3 wide, the '+-------+-----+' rules are 15 characters long but the heading row prints 17, with the heading text jammed up against the right-hand edge of its cell instead of sitting in the middle of it. Body rows are fine, and so is anything flush left or flush right; the trouble only shows up where a value is meant to sit in the middle of its field, and it gets worse the wider the field is. The column widths themselves are worked out correctly.",
+  "ground_truth_files": [
+    "align/cells.py"
+  ],
+  "reference_fix": {
+    "path": "align/cells.py",
+    "old": "    before = width - len(text) // 2",
+    "new": "    before = (width - len(text)) // 2"
+  },
+  "max_steps": 30
+}

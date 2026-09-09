@@ -1,0 +1,13 @@
+{
+  "id": "deepmerge",
+  "category": "layered config merge (falsy override values silently dropped by a truthiness test); two packages, library plus application layer",
+  "fixture": "evals/ladder/fixtures/deepmerge",
+  "issue": "Turning something off in a higher-priority layer has no effect. Our production profile contains `debug = false` and `retries = 0`, but the effective settings still come out with debug on and retries at 3, which are the packaged development values. Setting those same keys to `true` or to any non-zero number is picked up immediately, and unrelated keys in the same profile (host, worker count, log level) always win as expected. Passing an empty list to clear a defaulted list is ignored in the same way. It looks like a value only counts as an override when it is 'something', which is wrong: only an absent value should defer to the layer underneath.",
+  "ground_truth_files": ["confkit/merge.py"],
+  "reference_fix": {
+    "path": "confkit/merge.py",
+    "old": "        if not value:",
+    "new": "        if value is None:"
+  },
+  "max_steps": 30
+}

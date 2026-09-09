@@ -1,0 +1,16 @@
+{
+  "id": "cardfile",
+  "category": "stale secondary index after an in-place update (the pre-change record is lost before it can be un-indexed); 28 files across four packages",
+  "fixture": "evals/ladder/fixtures/cardfile",
+  "issue": "Changing a field that has an index on it leaves the record filed under its old value as well as the new one. I store a job with status \"open\", change its status to \"done\", then ask for everything with status \"open\" - the job is still in the answer, and asking for \"done\" returns it too. Walking every record by hand and comparing the field gives the right answer, so only the fast lookup disagrees. The same thing bites us on a unique field: after changing a record's code from \"A-1\" to \"A-2\", storing a different record with code \"A-1\" is rejected as a duplicate even though nothing holds \"A-1\" any more. Replacing a whole record instead of changing one field behaves correctly.",
+  "ground_truth_files": [
+    "catalog/store.py",
+    "catalog/indexing/registry.py"
+  ],
+  "reference_fix": {
+    "path": "catalog/store.py",
+    "old": "        patch = normalize_changes(changes)\n        current.update(patch)\n        self._indexes.reindex(record_id, current, current)\n",
+    "new": "        patch = normalize_changes(changes)\n        previous = copy_record(current)\n        current.update(patch)\n        self._indexes.reindex(record_id, previous, current)\n"
+  },
+  "max_steps": 30
+}

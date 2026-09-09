@@ -1,0 +1,16 @@
+{
+  "id": "find_in_sorted",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/find_in_sorted",
+  "issue": "The find in sorted routine gives wrong results: calling it with [[1, 2, 3, 4, 6, 7, 8], 5] raises RecursionError: maximum recursion depth exceeded.",
+  "ground_truth_files": [
+    "find_in_sorted.py"
+  ],
+  "reference_fix": {
+    "path": "find_in_sorted.py",
+    "old": "            return binsearch(mid, end)\n",
+    "new": "            return binsearch(mid + 1, end)\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

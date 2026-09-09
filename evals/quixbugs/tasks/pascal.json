@@ -1,0 +1,16 @@
+{
+  "id": "pascal",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/pascal",
+  "issue": "The pascal routine gives wrong results: calling it with [2] returns [[1], [1]], but the answer should be [[1], [1, 1]].",
+  "ground_truth_files": [
+    "pascal.py"
+  ],
+  "reference_fix": {
+    "path": "pascal.py",
+    "old": "        for c in range(0, r):\n",
+    "new": "        for c in range(0, r + 1):\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

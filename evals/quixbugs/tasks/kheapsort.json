@@ -1,0 +1,16 @@
+{
+  "id": "kheapsort",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/kheapsort",
+  "issue": "The kheapsort routine gives wrong results: calling it with [[3, 2, 1, 5, 4], 2] returns [2, 2, 1, 3, 3, 4, 5], but the answer should be [1, 2, 3, 4, 5].",
+  "ground_truth_files": [
+    "kheapsort.py"
+  ],
+  "reference_fix": {
+    "path": "kheapsort.py",
+    "old": "    for x in arr:\n",
+    "new": "    for x in arr[k:]:\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

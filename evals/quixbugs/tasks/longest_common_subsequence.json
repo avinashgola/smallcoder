@@ -1,0 +1,16 @@
+{
+  "id": "longest_common_subsequence",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/longest_common_subsequence",
+  "issue": "The longest common subsequence routine gives wrong results: calling it with ['thisisatest', 'testing123testing'] returns 'tiitest', but the answer should be 'tsitest'.",
+  "ground_truth_files": [
+    "longest_common_subsequence.py"
+  ],
+  "reference_fix": {
+    "path": "longest_common_subsequence.py",
+    "old": "        return a[0] + longest_common_subsequence(a[1:], b)\n",
+    "new": "        return a[0] + longest_common_subsequence(a[1:], b[1:])\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

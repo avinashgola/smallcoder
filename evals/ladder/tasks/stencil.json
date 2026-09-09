@@ -1,0 +1,13 @@
+{
+  "id": "stencil",
+  "category": "mutable default argument shared between instances; template engine split over a package and a sub-package",
+  "fixture": "evals/ladder/fixtures/stencil",
+  "issue": "Values registered on one template renderer leak into renderers built afterwards. A process that creates a renderer, registers a footer on it, then creates a second renderer for a different page finds the second one already knows the first one's footer, and the one-shot render helper picks it up too. Handing a dictionary of defaults to a renderer is just as bad: the caller's own dictionary quietly grows new keys whenever anything is registered on that renderer. Each renderer should start out with only the values it was actually given.",
+  "ground_truth_files": ["stencil/environment.py"],
+  "reference_fix": {
+    "path": "stencil/environment.py",
+    "old": "    def __init__(self, defaults={}):\n        self.defaults = defaults",
+    "new": "    def __init__(self, defaults=None):\n        self.defaults = dict(defaults or {})"
+  },
+  "max_steps": 30
+}

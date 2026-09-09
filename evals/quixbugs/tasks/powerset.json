@@ -1,0 +1,16 @@
+{
+  "id": "powerset",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/powerset",
+  "issue": "The powerset routine gives wrong results: calling it with [['a', 'b', 'c']] returns [['a', 'b', 'c']], but the answer should be [[], ['c'], ['b'], ['b', 'c'], ['a'], ['a', 'c'], ['a', 'b'], ['a', 'b', 'c']].",
+  "ground_truth_files": [
+    "powerset.py"
+  ],
+  "reference_fix": {
+    "path": "powerset.py",
+    "old": "        return [[first] + subset for subset in rest_subsets]\n",
+    "new": "        return rest_subsets + [[first] + subset for subset in rest_subsets]\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

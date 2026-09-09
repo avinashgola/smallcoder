@@ -1,0 +1,16 @@
+{
+  "id": "pipeline",
+  "category": "middleware chain (state shared between instances through a mutable default argument); 27 files across 4 packages, two files needed to see the defect",
+  "fixture": "evals/ladder/fixtures/pipeline",
+  "issue": "Building more than one application in the same process makes them share middleware. In our test suite a header-stamping layer registered on the app built by one test keeps running for the app built by the next test, and a brand new application reports dozens of installed layers before anything has been registered on it -- the layers from every application built earlier in the process, in order, duplicates included. Building an application and handing it an explicit list of layers up front does not have the problem; it only happens for applications that start empty and get their layers added one at a time.",
+  "ground_truth_files": [
+    "middleware/chain.py",
+    "web/application.py"
+  ],
+  "reference_fix": {
+    "path": "middleware/chain.py",
+    "old": "    def __init__(self, layers=[]):\n        self.layers = layers\n",
+    "new": "    def __init__(self, layers=None):\n        self.layers = list(layers) if layers else []\n"
+  },
+  "max_steps": 30
+}

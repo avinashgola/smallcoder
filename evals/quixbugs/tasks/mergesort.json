@@ -1,0 +1,16 @@
+{
+  "id": "mergesort",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/mergesort",
+  "issue": "The mergesort routine gives wrong results: calling it with [[1, 2, 6, 72, 7, 33, 4]] raises RecursionError: maximum recursion depth exceeded.",
+  "ground_truth_files": [
+    "mergesort.py"
+  ],
+  "reference_fix": {
+    "path": "mergesort.py",
+    "old": "    if len(arr) == 0:\n",
+    "new": "    if len(arr) <= 1:\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

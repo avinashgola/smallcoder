@@ -1,0 +1,13 @@
+{
+  "id": "rollout",
+  "category": "feature-flag percentage rollout (off-by-one: an inclusive comparison makes each rollout one bucket too wide); two packages, flag engine plus application gate",
+  "fixture": "evals/ladder/fixtures/rollout",
+  "issue": "Rollout percentages are slightly too generous and, worse, a feature we have not started rolling out yet is already reaching people. A flag parked at 0% while we finish the copy showed up for a customer, and support reproduced it: out of a couple of hundred accounts, one gets the feature at 0%. Measuring a 50% flag over the same accounts gives 81 of 200 rather than 79, and the two extra accounts are always the same ones. Allow lists, deny lists and the master off switch all behave correctly, and the assignment is stable -- an account never moves between runs. It looks like an account sitting exactly on the edge of the rolled-out share is being counted as inside it.",
+  "ground_truth_files": ["flags/bucket.py"],
+  "reference_fix": {
+    "path": "flags/bucket.py",
+    "old": "    return bucket_of(flag, subject) <= clamp(percent)",
+    "new": "    return bucket_of(flag, subject) < clamp(percent)"
+  },
+  "max_steps": 30
+}

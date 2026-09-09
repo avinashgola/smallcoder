@@ -1,0 +1,16 @@
+{
+  "id": "lcs_length",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/lcs_length",
+  "issue": "The lcs length routine gives wrong results: calling it with ['witch', 'sandwich'] returns 1, but the answer should be 2.",
+  "ground_truth_files": [
+    "lcs_length.py"
+  ],
+  "reference_fix": {
+    "path": "lcs_length.py",
+    "old": "                dp[i, j] = dp[i - 1, j] + 1\n",
+    "new": "                dp[i, j] = dp[i - 1, j - 1] + 1\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

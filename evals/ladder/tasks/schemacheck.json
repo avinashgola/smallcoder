@@ -1,0 +1,15 @@
+{
+  "id": "schemacheck",
+  "category": "payload schema validation (a misplaced early return abandons the check as soon as one field is acceptable); two packages, validation library plus API handlers",
+  "fixture": "evals/ladder/fixtures/schemacheck",
+  "issue": "Our signup and order forms accept payloads they should reject. A signup with the email 'ada@' goes through with a 201 as long as the name is filled in correctly; typing a bad name at the same time makes the email problem appear again. Same story on the order form: an order with a valid product code but a quantity of 0 and a shipping method that does not exist is accepted, and a request carrying a field we never declared is only refused when something earlier in the form is also wrong. Missing required fields are always listed properly. It behaves as though checking stops the moment a field turns out to be fine, so anything declared after it is never looked at.",
+  "ground_truth_files": [
+    "schemacheck/schema.py"
+  ],
+  "reference_fix": {
+    "path": "schemacheck/schema.py",
+    "old": "        if problem is None:\n            return errors\n",
+    "new": "        if problem is None:\n            continue\n"
+  },
+  "max_steps": 30
+}

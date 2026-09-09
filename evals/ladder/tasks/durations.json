@@ -1,0 +1,15 @@
+{
+  "id": "durations",
+  "category": "operator precedence slip in a unit conversion (x / A * B where x / (A * B) was meant); wrong values surface only in the reporting package",
+  "fixture": "evals/ladder/fixtures/durations",
+  "issue": "Every figure we print in hours is coming out as the raw number of seconds. A project with 4h45m logged shows up in the weekly report as \"acme: 4h45m (17100.0h)\" - the duration text printed beside it is right, only the hours number is wrong. The same thing happens to a single entry: 1h15m reports 4500.0 hours instead of 1.25, and the overtime figure against a 1 hour cap says 18000.0 rather than 5.0. Totals expressed in seconds, the per-day and per-project breakdowns, and everything the parser and formatter do are all correct.",
+  "ground_truth_files": [
+    "spans/arith.py"
+  ],
+  "reference_fix": {
+    "path": "spans/arith.py",
+    "old": "    return round(total_seconds / SECONDS_PER_MINUTE * MINUTES_PER_HOUR, places)\n",
+    "new": "    return round(total_seconds / (SECONDS_PER_MINUTE * MINUTES_PER_HOUR), places)\n"
+  },
+  "max_steps": 30
+}

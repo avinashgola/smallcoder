@@ -1,0 +1,16 @@
+{
+  "id": "flatten",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/flatten",
+  "issue": "The flatten routine gives wrong results: calling it with [[[1, [], [2, 3]], [[4]], 5]] returns ['<generator object flatten>', '<generator object flatten>', '<generator object flatten>', '<generator object flatten>', '<generator object flatten>'], but the answer should be [1, 2, 3, 4, 5].",
+  "ground_truth_files": [
+    "flatten.py"
+  ],
+  "reference_fix": {
+    "path": "flatten.py",
+    "old": "            yield flatten(x)\n",
+    "new": "            yield x\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

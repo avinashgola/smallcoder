@@ -1,0 +1,15 @@
+{
+  "id": "negotiate",
+  "category": "content negotiation (a non-strict comparison makes the last equally-rated candidate win, and lets a zero-rated one win at all); 30 files across 4 packages",
+  "fixture": "evals/ladder/fixtures/negotiate",
+  "issue": "Our sales report endpoint can produce JSON, CSV and HTML and is configured to prefer them in that order, but a client that sends no Accept header, or sends Accept: */*, gets HTML back -- the last format the endpoint lists rather than the first. The catalogue endpoint, which lists CSV ahead of JSON, has the mirror image of the problem: plain curl with no Accept header gets JSON from it. Asking for one specific type explicitly still works. There is a worse version of this: a client that sends Accept: application/xml, which none of our endpoints can produce, gets a 200 with an HTML body instead of the 406 it should get.",
+  "ground_truth_files": [
+    "content/selection.py"
+  ],
+  "reference_fix": {
+    "path": "content/selection.py",
+    "old": "        quality = quality_of(offer, rankings)\n        if quality >= best_quality:\n",
+    "new": "        quality = quality_of(offer, rankings)\n        if quality > best_quality:\n"
+  },
+  "max_steps": 30
+}

@@ -1,0 +1,16 @@
+{
+  "id": "lis",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/lis",
+  "issue": "The lis routine gives wrong results: calling it with [[4, 1, 5, 3, 7, 6, 2]] returns 2, but the answer should be 3.",
+  "ground_truth_files": [
+    "lis.py"
+  ],
+  "reference_fix": {
+    "path": "lis.py",
+    "old": "            longest = length + 1\n",
+    "new": "            longest = max(longest, length + 1)\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

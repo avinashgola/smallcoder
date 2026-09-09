@@ -1,0 +1,15 @@
+{
+  "id": "shiftplan",
+  "category": "incorrect early return inside a scanning loop; only the first run of a sequence is ever examined",
+  "fixture": "evals/ladder/fixtures/shiftplan",
+  "issue": "The compliance check misses long runs of consecutive days whenever the person also worked a shorter block earlier on. Ana is rostered on 4 and 5 March 2024, is off on the 6th and 7th, and is then on every day from 8 to 14 March - seven days straight - but the report says her longest run is 2 days and raises no consecutive-days violation at all. Delete her 4 and 5 March shifts and the very same report correctly says 7 and flags it. Someone whose whole month is one unbroken block is always counted correctly. The rest-period and weekly-hours checks, the clash detection and the coverage numbers are all fine.",
+  "ground_truth_files": [
+    "rota/rules.py"
+  ],
+  "reference_fix": {
+    "path": "rota/rules.py",
+    "old": "        else:\n            return best\n",
+    "new": "        else:\n            run = 1\n"
+  },
+  "max_steps": 30
+}

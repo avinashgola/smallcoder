@@ -1,0 +1,16 @@
+{
+  "id": "sieve",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/sieve",
+  "issue": "The sieve routine gives wrong results: calling it with [2] returns [], but the answer should be [2].",
+  "ground_truth_files": [
+    "sieve.py"
+  ],
+  "reference_fix": {
+    "path": "sieve.py",
+    "old": "        if any(n % p > 0 for p in primes):\n",
+    "new": "        if all(n % p > 0 for p in primes):\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

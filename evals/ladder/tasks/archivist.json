@@ -1,0 +1,15 @@
+{
+  "id": "archivist",
+  "category": "emptiness tested by truthiness instead of by absence, so falsy values are dropped on the way out; 25 files across four packages",
+  "fixture": "evals/ladder/fixtures/archivist",
+  "issue": "Saving a depot and reading it back loses fields that hold an empty value. An entry with minutes set to 0 comes back with no minutes field at all; done set to false vanishes the same way, and so do an empty note and an empty list. Fields holding real values survive, and nothing complains while saving - the saved data simply does not contain them, so filtering the reloaded entries for \"minutes is 0\" finds nothing. Fields that were genuinely never filled in are supposed to be left out, and those are handled correctly; it is the ones we deliberately set to zero or empty that go missing.",
+  "ground_truth_files": [
+    "archive/writer.py"
+  ],
+  "reference_fix": {
+    "path": "archive/writer.py",
+    "old": "        value = entry.fields[name]\n        if not value:\n            continue\n",
+    "new": "        value = entry.fields[name]\n        if value is None:\n            continue\n"
+  },
+  "max_steps": 30
+}

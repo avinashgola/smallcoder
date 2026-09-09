@@ -1,0 +1,16 @@
+{
+  "id": "gcd",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/gcd",
+  "issue": "The gcd routine gives wrong results: calling it with [13, 13] raises RecursionError: maximum recursion depth exceeded.",
+  "ground_truth_files": [
+    "gcd.py"
+  ],
+  "reference_fix": {
+    "path": "gcd.py",
+    "old": "        return gcd(a % b, b)\n",
+    "new": "        return gcd(b, a % b)\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

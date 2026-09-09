@@ -1,0 +1,16 @@
+{
+  "id": "possible_change",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/possible_change",
+  "issue": "The possible change routine gives wrong results: calling it with [[1, 5, 10, 25], 11] raises ValueError: not enough values to unpack (expected at least 1, got 0).",
+  "ground_truth_files": [
+    "possible_change.py"
+  ],
+  "reference_fix": {
+    "path": "possible_change.py",
+    "old": "    if total < 0:\n",
+    "new": "    if total < 0 or not coins:\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

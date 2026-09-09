@@ -1,0 +1,16 @@
+{
+  "id": "next_palindrome",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/next_palindrome",
+  "issue": "The next palindrome routine gives wrong results: calling it with [[9, 9, 9]] returns [1, 0, 0, 0, 1], but the answer should be [1, 0, 0, 1].",
+  "ground_truth_files": [
+    "next_palindrome.py"
+  ],
+  "reference_fix": {
+    "path": "next_palindrome.py",
+    "old": "    return [1] + (len(digit_list)) * [0] + [1]\n",
+    "new": "    return [1] + (len(digit_list) - 1) * [0] + [1]\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

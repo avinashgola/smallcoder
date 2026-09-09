@@ -1,0 +1,16 @@
+{
+  "id": "kth",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/kth",
+  "issue": "The kth routine gives wrong results: calling it with [[1, 2, 3, 4, 5, 6, 7], 4] raises IndexError: list index out of range.",
+  "ground_truth_files": [
+    "kth.py"
+  ],
+  "reference_fix": {
+    "path": "kth.py",
+    "old": "        return kth(above, k)\n",
+    "new": "        return kth(above, k - num_lessoreq)\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

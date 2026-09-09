@@ -1,0 +1,16 @@
+{
+  "id": "blueprints",
+  "category": "one mutable default value shared by every record built from a template (aliasing instead of copying); 24 files across four packages",
+  "fixture": "evals/ladder/fixtures/blueprints",
+  "issue": "Records built from the same template share their list and map fields. I create two tasks, neither of them given any tags, then add the tag \"home\" to the first one - and the second one now has it too. Worse, a task created afterwards starts life already carrying \"home\", so the template itself seems to be picking up whatever the last record was given. Text, number and flag fields are unaffected. Two things do behave: clearing the field on a record first, and records loaded back from a saved file, which stay independent of each other.",
+  "ground_truth_files": [
+    "cabinet/drawer.py",
+    "blueprint/fields.py"
+  ],
+  "reference_fix": {
+    "path": "cabinet/drawer.py",
+    "old": "            else:\n                record[field.name] = field.default\n",
+    "new": "            else:\n                record[field.name] = field.blank()\n"
+  },
+  "max_steps": 30
+}

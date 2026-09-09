@@ -1,0 +1,15 @@
+{
+  "id": "dispatch",
+  "category": "routing (incorrect early return: the first path match decides the method check); 30 files across 4 packages",
+  "fixture": "evals/ladder/fixtures/dispatch",
+  "issue": "Only the first method registered for a URL is reachable. GET /articles works, but POST /articles comes back 405 Method Not Allowed even though a POST handler is registered for exactly that URL, and the Allow header on that 405 lists only GET and HEAD. If I register the POST handler first then POST works and GET starts returning 405 instead, so it looks like whichever handler is registered second for a path is simply never reached. Splitting the two handlers across different URLs makes both work again.",
+  "ground_truth_files": [
+    "routing/router.py"
+  ],
+  "reference_fix": {
+    "path": "routing/router.py",
+    "old": "            allowed.update(route.methods)\n            if not route.accepts(method):\n                raise MethodNotAllowed(sorted(allowed))\n            return route, params\n        raise NotFound(path)\n",
+    "new": "            allowed.update(route.methods)\n            if not route.accepts(method):\n                continue\n            return route, params\n        if allowed:\n            raise MethodNotAllowed(sorted(allowed))\n        raise NotFound(path)\n"
+  },
+  "max_steps": 30
+}

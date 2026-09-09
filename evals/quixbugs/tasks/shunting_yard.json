@@ -1,0 +1,16 @@
+{
+  "id": "shunting_yard",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/shunting_yard",
+  "issue": "The shunting yard routine gives wrong results: calling it with [[10, '-', 5, '-', 2]] returns [10, 5, 2], but the answer should be [10, 5, '-', 2, '-'].",
+  "ground_truth_files": [
+    "shunting_yard.py"
+  ],
+  "reference_fix": {
+    "path": "shunting_yard.py",
+    "old": "                rpntokens.append(opstack.pop())\n",
+    "new": "                rpntokens.append(opstack.pop())\n            opstack.append(token)\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

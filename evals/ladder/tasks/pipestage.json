@@ -1,0 +1,15 @@
+{
+  "id": "pipestage",
+  "category": "state leaking between runs (shared mutable default); 4 packages, 28 files",
+  "fixture": "evals/ladder/fixtures/pipestage",
+  "issue": "Running the same pipeline twice in one process gives a different answer the second time. The rows our filters reject pile up: a batch that reports 2 rejected rows on the first run reports 4 on the second and 6 on the third, and the rejection reasons from the earlier runs are still listed in the new run's report. It is not specific to reusing one pipeline object - building a brand new pipeline in the same process starts out with the previous run's rejects, and the collected output and group counts of an earlier run are visible in a later run's report too. Restarting the process clears it. Every run is supposed to start with nothing recorded.",
+  "ground_truth_files": [
+    "stages/context.py"
+  ],
+  "reference_fix": {
+    "path": "stages/context.py",
+    "old": "    def __init__(self, run_id, params=None, artifacts={}):\n        self.run_id = run_id\n        self.params = dict(params or {})\n        self.artifacts = artifacts",
+    "new": "    def __init__(self, run_id, params=None, artifacts=None):\n        self.run_id = run_id\n        self.params = dict(params or {})\n        self.artifacts = dict(artifacts or {})"
+  },
+  "max_steps": 30
+}

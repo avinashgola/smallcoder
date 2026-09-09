@@ -1,0 +1,13 @@
+{
+  "id": "linediff",
+  "category": "incorrect change-detection predicate causing an early return; LCS differ split across a core package and a rendering package",
+  "fixture": "evals/ladder/fixtures/linediff",
+  "issue": "A diff that only adds lines comes out empty. Comparing a file to a copy of itself with one extra line inserted produces no output at all, and the one-line summary reports \"no changes\" even though a line was plainly added. Deleting a line works, and so does replacing one, so the tool is only blind when nothing was taken away. The line numbers and hunk grouping look right whenever any output does appear.",
+  "ground_truth_files": ["diffcore/ops.py"],
+  "reference_fix": {
+    "path": "diffcore/ops.py",
+    "old": "    return any(op.tag == DELETE for op in ops)",
+    "new": "    return any(op.tag != EQUAL for op in ops)"
+  },
+  "max_steps": 30
+}

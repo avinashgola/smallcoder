@@ -1,0 +1,16 @@
+{
+  "id": "mounts",
+  "category": "sub-application mounting (off-by-one slice hands the mounted app a path the matcher cannot match); 30 files across 5 packages, two files needed to see the defect",
+  "fixture": "evals/ladder/fixtures/mounts",
+  "issue": "Since we started serving the admin and API applications under path prefixes, every URL inside them returns 404. GET /admin, GET /admin/users and GET /api/v1/items all come back not_found, while the host application's own routes (/, /health, /_mounts) are fine and the debug map still lists all four applications and their routes at the prefixes we expect. The same applications answer correctly when they are served on their own with no prefix in front of them, and an application attached at the root prefix works too, so the routes themselves are registered correctly -- something about being served underneath a prefix stops them being reached.",
+  "ground_truth_files": [
+    "mounting/table.py",
+    "routes/template.py"
+  ],
+  "reference_fix": {
+    "path": "mounting/table.py",
+    "old": "            if mount.is_root:\n                return mount, path\n            rest = path[len(mount.prefix) + 1:]\n            return mount, rest\n",
+    "new": "            if mount.is_root:\n                return mount, path\n            rest = path[len(mount.prefix):] or \"/\"\n            return mount, rest\n"
+  },
+  "max_steps": 30
+}

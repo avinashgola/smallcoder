@@ -1,0 +1,16 @@
+{
+  "id": "get_factors",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/get_factors",
+  "issue": "The get factors routine gives wrong results: calling it with [100] returns [2, 2, 5], but the answer should be [2, 2, 5, 5].",
+  "ground_truth_files": [
+    "get_factors.py"
+  ],
+  "reference_fix": {
+    "path": "get_factors.py",
+    "old": "\n    return []\n",
+    "new": "\n    return [n]\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

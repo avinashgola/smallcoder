@@ -1,0 +1,16 @@
+{
+  "id": "to_base",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/to_base",
+  "issue": "The to base routine gives wrong results: calling it with [31, 16] returns 'F1', but the answer should be '1F'.",
+  "ground_truth_files": [
+    "to_base.py"
+  ],
+  "reference_fix": {
+    "path": "to_base.py",
+    "old": "        result = result + alphabet[i]\n",
+    "new": "        result = alphabet[i] + result\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

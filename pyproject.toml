@@ -41,6 +41,8 @@ extend-exclude = [
     "evals/fixtures",
     "evals/heldout/fixtures",
     "evals/m3_generalization/fixtures",
+    "evals/ladder/fixtures",
+    "evals/quixbugs/fixtures",
     "examples",
 ]
 

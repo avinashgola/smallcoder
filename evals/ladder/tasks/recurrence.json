@@ -1,0 +1,15 @@
+{
+  "id": "recurrence",
+  "category": "mutable default argument shared across instances; cancellation state leaks between unrelated recurring events",
+  "fixture": "evals/ladder/fixtures/recurrence",
+  "issue": "Cancelling a single occurrence of one recurring event wipes that date out of other, unrelated events. In one calendar the daily standup and a Friday retro both run from Monday 4 March 2024; cancelling the standup on Friday 8 March also makes the retro vanish from that day, and the retro was never touched. It is worse than that - any recurring event created after a cancellation is born already missing the cancelled date, so a brand new Mon/Wed/Fri series starting 4 March 2024 that should list 4, 6 and 8 March comes back as 4, 8 and 11 March. Cancellations passed in explicitly when the event is first set up behave correctly; it is only the ones applied afterwards that spread.",
+  "ground_truth_files": [
+    "recur/rules.py"
+  ],
+  "reference_fix": {
+    "path": "recur/rules.py",
+    "old": "    def __init__(self, pattern, start, count=None, until=None, exclusions=[]):\n        self.pattern = pattern\n        self.start = start\n        self.count = count\n        self.until = until\n        self.exclusions = exclusions\n",
+    "new": "    def __init__(self, pattern, start, count=None, until=None, exclusions=None):\n        self.pattern = pattern\n        self.start = start\n        self.count = count\n        self.until = until\n        self.exclusions = [] if exclusions is None else list(exclusions)\n"
+  },
+  "max_steps": 30
+}

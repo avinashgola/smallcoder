@@ -1,0 +1,16 @@
+{
+  "id": "dagrun",
+  "category": "dependency ordering (a repeated edge is counted more times than it is cleared); 4 packages, 29 files, two-file defect",
+  "fixture": "evals/ladder/fixtures/dagrun",
+  "issue": "Declaring the same upstream job twice hangs the run. In our nightly pipeline one job waits for [\"@build\", \"compile\"], and the build group already contains compile. Every upstream job succeeds, but the run then aborts with \"ScheduleError: no runnable jobs but 2 still pending\" and the job that named compile twice never starts. Deleting the redundant entry from the spec makes the very same pipeline run to the end, so a repeated dependency seems to be counted more times than it is ever cleared.",
+  "ground_truth_files": [
+    "flow/graph.py",
+    "flow/scheduler.py"
+  ],
+  "reference_fix": {
+    "path": "flow/graph.py",
+    "old": "        self._deps[job_id].append(depends_on)\n        self._dependents[depends_on].add(job_id)",
+    "new": "        if depends_on not in self._deps[job_id]:\n            self._deps[job_id].append(depends_on)\n        self._dependents[depends_on].add(job_id)"
+  },
+  "max_steps": 30
+}

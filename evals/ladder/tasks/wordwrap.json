@@ -1,0 +1,13 @@
+{
+  "id": "wordwrap",
+  "category": "off-by-one boundary condition in a greedy line filler; two packages, layered helpers",
+  "fixture": "evals/ladder/fixtures/wordwrap",
+  "issue": "Wrapping text to a fixed width loses one usable column. A word that would end exactly on the width boundary is pushed onto the next line instead of staying put. Wrapping \"one two three\" to 7 columns produces three lines (\"one\", \"two\", \"three\") even though \"one two\" is exactly 7 characters wide and should share a line. Every paragraph comes out more ragged than it needs to be, and the effect gets worse at narrow widths.",
+  "ground_truth_files": ["wrapping/filler.py"],
+  "reference_fix": {
+    "path": "wrapping/filler.py",
+    "old": "        if current and used + gap + len(word) >= width:",
+    "new": "        if current and used + gap + len(word) > width:"
+  },
+  "max_steps": 30
+}

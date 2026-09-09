@@ -1,0 +1,16 @@
+{
+  "id": "bucketsort",
+  "category": "QuixBugs (external, MIT): classic algorithm with a single injected defect",
+  "fixture": "evals/quixbugs/fixtures/bucketsort",
+  "issue": "The bucketsort routine gives wrong results: calling it with [[3, 11, 2, 9, 1, 5], 12] returns [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 5], but the answer should be [1, 2, 3, 5, 9, 11].",
+  "ground_truth_files": [
+    "bucketsort.py"
+  ],
+  "reference_fix": {
+    "path": "bucketsort.py",
+    "old": "    for i, count in enumerate(arr):\n",
+    "new": "    for i, count in enumerate(counts):\n"
+  },
+  "max_steps": 30,
+  "source": "https://github.com/jkoppel/QuixBugs"
+}

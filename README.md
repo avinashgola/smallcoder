@@ -333,3 +333,20 @@ ruff check .
    finish-rate gap (the suppressing prompt sentence vs right-censoring by stall
    verification). Beyond that, a larger suite: the drift check showed
    within-arm variance of the same order as the effects being chased.
+
+## Licence and attribution
+
+MIT — see [LICENSE](LICENSE).
+
+The tasks under `evals/quixbugs/` are derived from
+[QuixBugs](https://github.com/jkoppel/QuixBugs) (Lin, Koppel, Chen &
+Solar-Lezama, 2017), MIT licensed. The conversion is performed by
+`evals/import_quixbugs.py` and documented, with the upstream licence, in
+[`evals/quixbugs/ATTRIBUTION.md`](evals/quixbugs/ATTRIBUTION.md). Every other
+fixture in this repository was written for it.
+
+Running the agent requires an [Ollama](https://ollama.com) endpoint, configured
+via `OLLAMA_BASE_URL` in a local `.env` (see `.env.example` if present). No
+endpoint, host or credential is committed: raw run artifacts under
+`results/runs/` are gitignored, and every persisted benchmark row is scrubbed of
+the configured endpoint before it is written.

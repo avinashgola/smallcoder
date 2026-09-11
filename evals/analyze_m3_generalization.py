@@ -18,6 +18,12 @@ results/analysis/m3-generalization-preregistration.md:
   - run-level Fisher exact tests are labelled descriptive only.
 
 Identical inputs produce byte-identical output.
+
+For archival/CI reproduction, ``--derived-input`` accepts the tracked,
+sanitized mechanism rows and validates every non-derived field against the
+raw benchmark rows.  This avoids requiring gitignored trajectories merely to
+recompute an already-published analysis.  Omitting it retains the original
+trajectory-extraction path used to create the sanitized artifact.
 """
 
 from __future__ import annotations
@@ -79,7 +85,11 @@ def load_plan(path: Path) -> dict:
 
 
 def check_rows_against_plan(plan: dict, rows: list[dict]) -> None:
-    planned = {(e["model"], e["config"], e["task"], e["trial"]) for e in plan["entries"]}
+    planned_entries = {
+        (e["model"], e["config"], e["task"], e["trial"]): e
+        for e in plan["entries"]
+    }
+    planned = set(planned_entries)
     seen: Counter = Counter((r["model"], r["config"], r["task"], r["trial"]) for r in rows)
     unknown = sorted(k for k in seen if k not in planned)
     if unknown:
@@ -90,6 +100,14 @@ def check_rows_against_plan(plan: dict, rows: list[dict]) -> None:
     missing = sorted(planned - set(seen))
     if missing:
         raise AnalysisError(f"{len(missing)} planned run(s) missing, e.g. {missing[0]}")
+    for row in rows:
+        key = (row["model"], row["config"], row["task"], row["trial"])
+        expected_index = planned_entries[key]["schedule_index"]
+        if row.get("schedule_index") != expected_index:
+            raise AnalysisError(
+                f"schedule_index mismatch for {key}: "
+                f"expected {expected_index}, got {row.get('schedule_index')}"
+            )
 
 
 def load_task_specs(tasks_dir: Path) -> dict[str, dict]:
@@ -142,6 +160,87 @@ def derive_mechanism_rows(rows: list[dict], specs: dict[str, dict], runs_dir: Pa
         derived.append(record)
     derived.sort(key=lambda r: r["schedule_index"])
     return derived
+
+
+def load_derived_rows(path: Path) -> list[dict]:
+    """Load a tracked sanitized mechanism artifact, rejecting schema drift."""
+    if not path.is_file():
+        raise AnalysisError(f"missing derived mechanism file: {path}")
+    expected_fields = set(DERIVED_FIELDS)
+    derived: list[dict] = []
+    try:
+        for lineno, line in enumerate(path.read_text().splitlines(), start=1):
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            if not isinstance(record, dict):
+                raise AnalysisError(f"derived line {lineno}: expected a JSON object")
+            fields = set(record)
+            if fields != expected_fields:
+                missing = sorted(expected_fields - fields)
+                extra = sorted(fields - expected_fields)
+                raise AnalysisError(
+                    f"derived line {lineno}: field mismatch "
+                    f"(missing={missing}, extra={extra})"
+                )
+            if not isinstance(record["gt_read"], bool):
+                raise AnalysisError(f"derived line {lineno}: gt_read must be boolean")
+            if not isinstance(record["schedule_index"], int):
+                raise AnalysisError(f"derived line {lineno}: schedule_index must be integer")
+            derived.append(record)
+    except json.JSONDecodeError as exc:
+        raise AnalysisError(
+            f"derived line {exc.lineno}: malformed JSON ({exc.msg})"
+        ) from exc
+    if not derived:
+        raise AnalysisError(f"derived mechanism file is empty: {path}")
+    derived.sort(key=lambda r: r["schedule_index"])
+    return derived
+
+
+def validate_derived_rows(rows: list[dict], derived: list[dict]) -> None:
+    """Bind tracked mechanism rows to raw rows; only ``gt_read`` may differ."""
+    raw_by_index: dict[int, dict] = {}
+    for row in rows:
+        index = row.get("schedule_index")
+        if not isinstance(index, int):
+            raise AnalysisError(f"raw row has invalid schedule_index: {index!r}")
+        if index in raw_by_index:
+            raise AnalysisError(f"raw rows duplicate schedule_index {index}")
+        raw_by_index[index] = row
+
+    derived_by_index: dict[int, dict] = {}
+    for record in derived:
+        index = record["schedule_index"]
+        if index in derived_by_index:
+            raise AnalysisError(f"derived rows duplicate schedule_index {index}")
+        derived_by_index[index] = record
+
+    if set(derived_by_index) != set(raw_by_index):
+        missing = sorted(set(raw_by_index) - set(derived_by_index))
+        extra = sorted(set(derived_by_index) - set(raw_by_index))
+        raise AnalysisError(
+            "derived/raw schedule indexes differ "
+            f"(missing={missing[:3]}, extra={extra[:3]})"
+        )
+
+    for index, raw in raw_by_index.items():
+        record = derived_by_index[index]
+        for field in DERIVED_FIELDS:
+            if field == "gt_read":
+                continue
+            if record[field] != raw.get(field):
+                raise AnalysisError(
+                    f"derived field {field!r} disagrees with raw row at "
+                    f"schedule_index {index}"
+                )
+
+
+def write_derived_rows(path: Path, derived: list[dict]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as fh:
+        for record in derived:
+            fh.write(json.dumps(record, sort_keys=True) + "\n")
 
 
 def _percentile_interval(sorted_values: list[float]) -> tuple[float, float]:
@@ -309,6 +408,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--tasks-dir", default="evals/m3_generalization/tasks")
     parser.add_argument("--runs-dir", default="results/runs")
     parser.add_argument(
+        "--derived-input",
+        default=None,
+        help=(
+            "Use a tracked sanitized mechanism JSONL instead of gitignored trajectories; "
+            "all non-derived fields are validated against --rows"
+        ),
+    )
+    parser.add_argument(
         "--derived-out", default="results/benchmarks/m3_generalization/mechanism.jsonl"
     )
     parser.add_argument("--resamples", type=int, default=BOOTSTRAP_RESAMPLES)
@@ -320,17 +427,17 @@ def main(argv: list[str] | None = None) -> int:
         rows = load_rows(args.rows)
         validate_rows(rows)
         check_rows_against_plan(plan, rows)
-        specs = load_task_specs(Path(args.tasks_dir))
-        derived = derive_mechanism_rows(rows, specs, Path(args.runs_dir))
+        if args.derived_input:
+            derived = load_derived_rows(Path(args.derived_input))
+            validate_derived_rows(rows, derived)
+        else:
+            specs = load_task_specs(Path(args.tasks_dir))
+            derived = derive_mechanism_rows(rows, specs, Path(args.runs_dir))
     except (AnalysisError, RowsError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
-    out = Path(args.derived_out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open("w", encoding="utf-8") as fh:
-        for record in derived:
-            fh.write(json.dumps(record, sort_keys=True) + "\n")
+    write_derived_rows(Path(args.derived_out), derived)
 
     result = analyze(derived, plan, args.resamples)
     if args.fmt == "json":

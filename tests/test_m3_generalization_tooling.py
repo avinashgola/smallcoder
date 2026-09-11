@@ -16,7 +16,9 @@ from evals.analyze_m3_generalization import (
     cluster_bootstrap,
     derive_mechanism_rows,
     gt_read_from_trajectory,
+    load_derived_rows,
     load_task_specs,
+    validate_derived_rows,
 )
 from evals.analyze_m3_generalization import (
     main as analyze_main,
@@ -271,6 +273,56 @@ def test_full_analysis_pipeline_and_sanitization(tmp_path, capsys):
     assert analyze_main(args) == 0
     assert capsys.readouterr().out == first_out
     assert derived_path.read_bytes() == first_derived
+
+
+def test_analysis_reproduces_from_tracked_mechanism_without_trajectories(tmp_path, capsys):
+    _, _, runs_dir, rows_path, plan_path, _ = build_synthetic_study(tmp_path)
+    mechanism_path = tmp_path / "mechanism.jsonl"
+    trajectory_args = [
+        "--rows", str(rows_path),
+        "--plan", str(plan_path),
+        "--runs-dir", str(runs_dir),
+        "--derived-out", str(mechanism_path),
+        "--resamples", "300",
+        "--format", "json",
+    ]
+    assert analyze_main(trajectory_args) == 0
+    expected_output = capsys.readouterr().out
+
+    # Reproduction must work with no trajectory tree at all.
+    replay_path = tmp_path / "replayed-mechanism.jsonl"
+    replay_args = [
+        "--rows", str(rows_path),
+        "--plan", str(plan_path),
+        "--runs-dir", str(tmp_path / "does-not-exist"),
+        "--derived-input", str(mechanism_path),
+        "--derived-out", str(replay_path),
+        "--resamples", "300",
+        "--format", "json",
+    ]
+    assert analyze_main(replay_args) == 0
+    assert capsys.readouterr().out == expected_output
+    assert replay_path.read_bytes() == mechanism_path.read_bytes()
+
+
+def test_tracked_mechanism_is_schema_checked_and_bound_to_raw_rows(tmp_path):
+    _, rows, runs_dir, rows_path, _, _ = build_synthetic_study(tmp_path)
+    specs = load_task_specs(Path("evals/m3_generalization/tasks"))
+    derived = derive_mechanism_rows(rows, specs, runs_dir)
+    mechanism_path = tmp_path / "mechanism.jsonl"
+    mechanism_path.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in derived))
+
+    loaded = load_derived_rows(mechanism_path)
+    validate_derived_rows(rows, loaded)
+
+    loaded[0]["tokens_in"] += 1
+    with pytest.raises(AnalysisError, match="disagrees with raw row"):
+        validate_derived_rows(rows, loaded)
+
+    unsafe = dict(derived[0], observation="must never be accepted")
+    mechanism_path.write_text(json.dumps(unsafe) + "\n")
+    with pytest.raises(AnalysisError, match="field mismatch"):
+        load_derived_rows(mechanism_path)
 
 
 def test_analysis_fails_on_missing_trajectory(tmp_path):

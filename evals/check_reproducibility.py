@@ -1,10 +1,11 @@
 """Prove the published numbers reproduce from tracked data — byte for byte.
 
 Every analyzer in this repository is deterministic, and every number in the
-reports derives from tracked rows. This module turns that from a claim into a
-CI gate: it re-runs every analysis against the committed data and diffs the
-output against golden copies under ``results/analysis/golden/``. Any drift —
-in the data, the analyzers, or their dependencies — fails the build.
+reports derives from tracked benchmark artifacts. This module turns that from
+a claim into a CI gate: it re-runs every analysis against the committed data
+and diffs the output against golden copies under
+``results/analysis/golden/``. Any drift — in the data, the analyzers, or their
+dependencies — fails the build.
 
 Usage:
   python -m evals.check_reproducibility             # verify (CI mode)
@@ -50,11 +51,19 @@ def outputs() -> dict[str, str]:
     }.items():
         result[name] = _capture(rows_main, argv)
 
-    # The study analyzer writes a derived mechanism file; point it at a temp
-    # path so verification never touches tracked artifacts.
+    # The study analyzer normally derives GT-read from private trajectories.
+    # CI instead validates and consumes the tracked sanitized mechanism rows,
+    # while writing its copy to a temp path so verification is read-only.
     with tempfile.TemporaryDirectory() as tmp:
         result["study-m3-generalization.md"] = _capture(
-            m3_main, ["--derived-out", f"{tmp}/mechanism.jsonl"])
+            m3_main,
+            [
+                "--derived-input",
+                "results/benchmarks/m3_generalization/mechanism.jsonl",
+                "--derived-out",
+                f"{tmp}/mechanism.jsonl",
+            ],
+        )
     result["study-generic-loop.md"] = _capture(
         generic_main, ["--rows", "results/benchmarks/generic_loop/rows_final.jsonl"])
     return result
